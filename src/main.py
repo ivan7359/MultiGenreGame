@@ -30,6 +30,12 @@ class Game:
         self.moveCommandX = 0
         self.moveCommandY = 0 
 
+    # Singleton pattern
+    def __new__(cls):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(Game, cls).__new__(cls)
+        return cls.instance
+
     def processInput(self):
         self.moveCommandX = 0
         self.moveCommandY = 0 
