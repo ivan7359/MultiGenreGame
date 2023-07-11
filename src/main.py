@@ -2,6 +2,17 @@ import pygame
 import logging
 
 WIDTH, HEIGHT = 1280, 720
+FPS = 60                        # limits FPS to 60
+SPEED_SCALE = 30
+
+class GameState():
+    def __init__(self, pos):
+        self.x = pos.x
+        self.y = pos.y
+
+    def update(self, moveCommandX, moveCommandY):
+        self.x += moveCommandX
+        self.y += moveCommandY
 
 class Game:
     def __init__(self):
@@ -10,12 +21,19 @@ class Game:
         logging.basicConfig(level=logging.DEBUG, filename="logs/logs.log",filemode="w")
         logging.info("Game was started")
         self.clock = pygame.time.Clock()
-        self.player_pos = pygame.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2)
+        self.gameState = GameState(pygame.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2))
+
         self.running = True
-        self.speed = 300
-        self.dt = 0
+        self.speed = 7
+        self.dt = 0                 # delta time in seconds since last frame
+
+        self.moveCommandX = 0
+        self.moveCommandY = 0 
 
     def processInput(self):
+        self.moveCommandX = 0
+        self.moveCommandY = 0 
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -24,34 +42,31 @@ class Game:
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_w]:
-            self.player_pos.y -= self.speed * self.dt
+            self.moveCommandY -= self.speed * self.dt
         if keys[pygame.K_s]:
-            self.player_pos.y += self.speed * self.dt
+            self.moveCommandY += self.speed * self.dt
         if keys[pygame.K_a]:
-            self.player_pos.x -= self.speed * self.dt
+            self.moveCommandX -= self.speed * self.dt
         if keys[pygame.K_d]:
-            self.player_pos.x += self.speed * self.dt
+            self.moveCommandX += self.speed * self.dt
 
     def update(self):
-        # flip() the display to put your work on screen
-        pygame.display.flip()
+        # We delegate store and update game data to GameState class
+        self.gameState.update(self.moveCommandX, self.moveCommandY)
 
     def render(self):
         self.screen.fill("black")
-        pygame.draw.circle(self.screen, "red", self.player_pos, 30)
+        pygame.draw.circle(self.screen, "red", (self.gameState.x, self.gameState.y), 30)
         
         pygame.display.update()
-        
-        # limits FPS to 60
-        # dt is delta time in seconds since last frame, used for framerate-
-        # independent physics.
-        self.dt = self.clock.tick(60) / 1000
 
     def run(self):
         while self.running:
             self.processInput()
             self.update()
             self.render()
+
+            self.dt = self.clock.tick(FPS) / SPEED_SCALE
 
         logging.info("Game was stopped")
         pygame.quit()
