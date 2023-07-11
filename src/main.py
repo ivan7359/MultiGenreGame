@@ -1,4 +1,5 @@
 import pygame
+import logging
 
 WIDTH, HEIGHT = 1280, 720
 
@@ -6,6 +7,8 @@ class Game:
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        logging.basicConfig(level=logging.DEBUG, filename="logs/logs.log",filemode="w")
+        logging.info("Game was started")
         self.clock = pygame.time.Clock()
         self.player_pos = pygame.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2)
         self.running = True
@@ -50,6 +53,7 @@ class Game:
             self.update()
             self.render()
 
+        logging.info("Game was stopped")
         pygame.quit()
 
 game = Game()
