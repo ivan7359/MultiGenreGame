@@ -12,11 +12,12 @@ class Game:
         self.speed = 300
         self.dt = 0
 
-    def render(self):
-        self.screen.fill("black")
-        pygame.draw.circle(self.screen, "red", self.player_pos, 30)
-
     def processInput(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+                break
+
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_w]:
@@ -32,6 +33,12 @@ class Game:
         # flip() the display to put your work on screen
         pygame.display.flip()
 
+    def render(self):
+        self.screen.fill("black")
+        pygame.draw.circle(self.screen, "red", self.player_pos, 30)
+        
+        pygame.display.update()
+        
         # limits FPS to 60
         # dt is delta time in seconds since last frame, used for framerate-
         # independent physics.
@@ -39,13 +46,9 @@ class Game:
 
     def run(self):
         while self.running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-
-            self.render()
             self.processInput()
             self.update()
+            self.render()
 
         pygame.quit()
 
