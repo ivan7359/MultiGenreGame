@@ -2,6 +2,7 @@ import pygame
 import logging
 
 from observer import *
+from command import *
 
 WIDTH, HEIGHT = 1280, 720
 FPS = 60                        # limits FPS to 60
@@ -25,6 +26,8 @@ class Game():
         self.clock = pygame.time.Clock()
         self.gameState = GameState(pygame.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2))
         self.publisher = Subject()
+        self.publisher.addObserver(Audio())
+        self.inputHandler = InputHandler(self.screen)
 
         self.running = True
         self.speed = 7
@@ -32,8 +35,6 @@ class Game():
 
         self.moveCommandX = 0
         self.moveCommandY = 0 
-
-        self.publisher.addObserver(Audio())
 
     # Singleton pattern
     def __new__(cls):
@@ -49,21 +50,25 @@ class Game():
             if event.type == pygame.QUIT:
                 self.running = False
                 break
+            
+        command = self.inputHandler.handleInput()
+        if(command):
+            command.execute()
 
-        keys = pygame.key.get_pressed()
+        # keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_w]:
-            self.moveCommandY -= self.speed * self.dt
-            self.publisher.notify(AudioEnum.jump.name)
-        if keys[pygame.K_s]:
-            self.moveCommandY += self.speed * self.dt
-            self.publisher.notify(AudioEnum.run.name)
-        if keys[pygame.K_a]:
-            self.moveCommandX -= self.speed * self.dt
-            self.publisher.notify(AudioEnum.run.name)
-        if keys[pygame.K_d]:
-            self.moveCommandX += self.speed * self.dt
-            self.publisher.notify(AudioEnum.run.name)
+        # if keys[pygame.K_w]:
+        #     self.moveCommandY -= self.speed * self.dt
+        #     self.publisher.notify(AudioEnum.jump.name)
+        # if keys[pygame.K_s]:
+        #     self.moveCommandY += self.speed * self.dt
+        #     self.publisher.notify(AudioEnum.run.name)
+        # if keys[pygame.K_a]:
+        #     self.moveCommandX -= self.speed * self.dt
+        #     self.publisher.notify(AudioEnum.run.name)
+        # if keys[pygame.K_d]:
+        #     self.moveCommandX += self.speed * self.dt
+        #     self.publisher.notify(AudioEnum.run.name)
 
 
     def update(self):
