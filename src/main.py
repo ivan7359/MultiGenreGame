@@ -1,6 +1,9 @@
 import pygame
 import logging
 
+from observer import *
+from command import *
+
 WIDTH, HEIGHT = 1280, 720
 FPS = 60                        # limits FPS to 60
 SPEED_SCALE = 30
@@ -14,7 +17,7 @@ class GameState():
         self.x += moveCommandX
         self.y += moveCommandY
 
-class Game:
+class Game():
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -22,6 +25,9 @@ class Game:
         logging.info("Game was started")
         self.clock = pygame.time.Clock()
         self.gameState = GameState(pygame.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2))
+        self.publisher = Subject()
+        self.publisher.addObserver(Audio())
+        self.inputHandler = InputHandler(self.screen)
 
         self.running = True
         self.speed = 7
@@ -44,17 +50,26 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
                 break
+            
+        command = self.inputHandler.handleInput()
+        if(command):
+            command.execute()
 
-        keys = pygame.key.get_pressed()
+        # keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_w]:
-            self.moveCommandY -= self.speed * self.dt
-        if keys[pygame.K_s]:
-            self.moveCommandY += self.speed * self.dt
-        if keys[pygame.K_a]:
-            self.moveCommandX -= self.speed * self.dt
-        if keys[pygame.K_d]:
-            self.moveCommandX += self.speed * self.dt
+        # if keys[pygame.K_w]:
+        #     self.moveCommandY -= self.speed * self.dt
+        #     self.publisher.notify(AudioEnum.jump.name)
+        # if keys[pygame.K_s]:
+        #     self.moveCommandY += self.speed * self.dt
+        #     self.publisher.notify(AudioEnum.run.name)
+        # if keys[pygame.K_a]:
+        #     self.moveCommandX -= self.speed * self.dt
+        #     self.publisher.notify(AudioEnum.run.name)
+        # if keys[pygame.K_d]:
+        #     self.moveCommandX += self.speed * self.dt
+        #     self.publisher.notify(AudioEnum.run.name)
+
 
     def update(self):
         # We delegate store and update game data to GameState class
