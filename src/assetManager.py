@@ -1,7 +1,7 @@
 import pygame
 import os
 
-FONT_SIZE = 16
+from config import *
 
 class AssetManager():
     def __init__(self, path):
@@ -30,11 +30,14 @@ class AssetManager():
             self.__scanFolder(self.path, '.mp3')
 
     def loadSounds(self):
+        logging.info("LOADING SOUNDS")
         # pygame.mixer.music.load()
         
         self.__loadResources('sounds')
 
     def loadImages(self):
+        logging.info("LOADING IMAGES")
+
         self.__loadResources('images')
         
         for file in self.__result:
@@ -45,13 +48,18 @@ class AssetManager():
 
         self.__result.clear()
 
-        # for i in self.__imgs:
-        #     print(i, '=', self.__imgs[i])
+        for i in self.__imgs:
+            logging.debug(i + ' = ' + str(self.__imgs[i]))
 
     def loadFonts(self):
+        logging.info("LOADING FONTS")
+
         self.__fonts['UI'] = pygame.freetype.Font("media/fonts/BD_Cartoon_Shout.ttf", FONT_SIZE)
         self.__fonts['HUD'] = pygame.freetype.Font("media/fonts/joystixmonospace.ttf", FONT_SIZE)
         self.__fonts['strategy'] = pygame.freetype.Font("media/fonts/kingdomCome.TTF", FONT_SIZE)
+
+        for i in self.__fonts:
+            logging.debug(i + ' = ' + str(self.__fonts[i]))
 
     def getSound(self, sound):
         return self.__sounds[sound]

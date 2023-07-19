@@ -1,13 +1,9 @@
 import pygame
-import logging
 
 from observer import *
 from command import *
 from assetManager import *
-
-WIDTH, HEIGHT = 1280, 720
-FPS = 60                        # limits FPS to 60
-SPEED_SCALE = 30
+from config import *
 
 class GameState():
     def __init__(self, pos):
@@ -22,9 +18,9 @@ class Game():
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        logging.basicConfig(level=logging.DEBUG, filename="logs/logs.log",filemode="w")
-        logging.info("Game was started")
         self.clock = pygame.time.Clock()
+        
+        logging.info("Game was started")
         
 # Load all resources
         self.assetMngr = AssetManager('media')
@@ -43,6 +39,7 @@ class Game():
 
         self.moveCommandX = 0
         self.moveCommandY = 0 
+
 
     # Singleton pattern
     def __new__(cls):
