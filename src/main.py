@@ -25,6 +25,13 @@ class Game():
         logging.basicConfig(level=logging.DEBUG, filename="logs/logs.log",filemode="w")
         logging.info("Game was started")
         self.clock = pygame.time.Clock()
+        
+# Load all resources
+        self.assetMngr = AssetManager('media')
+        self.assetMngr.loadImages()
+        self.assetMngr.loadSounds()
+        self.assetMngr.loadFonts()
+
         self.gameState = GameState(pygame.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2))
         self.publisher = Subject()
         self.publisher.addObserver(Audio())
