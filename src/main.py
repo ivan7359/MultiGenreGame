@@ -3,6 +3,7 @@ import logging
 
 from observer import *
 from command import *
+from assetManager import *
 
 WIDTH, HEIGHT = 1280, 720
 FPS = 60                        # limits FPS to 60
@@ -69,7 +70,6 @@ class Game():
         # if keys[pygame.K_d]:
         #     self.moveCommandX += self.speed * self.dt
         #     self.publisher.notify(AudioEnum.run.name)
-
 
     def update(self):
         # We delegate store and update game data to GameState class
