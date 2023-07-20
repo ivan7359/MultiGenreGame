@@ -1,12 +1,12 @@
 import pygame
-import logging
 
 from observer import *
 from command import *
+from assetManager import *
+from config import *
 
-WIDTH, HEIGHT = 1280, 720
-FPS = 60                        # limits FPS to 60
-SPEED_SCALE = 30
+from player import *
+from level import *
 
 class GameState():
     def __init__(self, pos):
@@ -21,9 +21,16 @@ class Game():
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        logging.basicConfig(level=logging.DEBUG, filename="logs/logs.log",filemode="w")
-        logging.info("Game was started")
         self.clock = pygame.time.Clock()
+        
+        logging.info("Game was started")
+
+# Load all resources
+        self.assetMngr = AssetManager('media')
+        # self.assetMngr.loadImages()
+        # self.assetMngr.loadSounds()
+        # self.assetMngr.loadFonts()
+
         self.gameState = GameState(pygame.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2))
         self.publisher = Subject()
         self.publisher.addObserver(Audio())
@@ -32,6 +39,10 @@ class Game():
         self.running = True
         self.speed = 7
         self.dt = 0                 # delta time in seconds since last frame
+
+        self.level = Level()
+        self.player = Player(self.level.getGroups(), self.level.getCollSprites())
+        self.level.setup_level(self.player)
 
         self.moveCommandX = 0
         self.moveCommandY = 0 
@@ -50,34 +61,18 @@ class Game():
             if event.type == pygame.QUIT:
                 self.running = False
                 break
-            
-        command = self.inputHandler.handleInput()
-        if(command):
-            command.execute()
 
-        # keys = pygame.key.get_pressed()
-
-        # if keys[pygame.K_w]:
-        #     self.moveCommandY -= self.speed * self.dt
-        #     self.publisher.notify(AudioEnum.jump.name)
-        # if keys[pygame.K_s]:
-        #     self.moveCommandY += self.speed * self.dt
-        #     self.publisher.notify(AudioEnum.run.name)
-        # if keys[pygame.K_a]:
-        #     self.moveCommandX -= self.speed * self.dt
-        #     self.publisher.notify(AudioEnum.run.name)
-        # if keys[pygame.K_d]:
-        #     self.moveCommandX += self.speed * self.dt
-        #     self.publisher.notify(AudioEnum.run.name)
-
+        # command = self.inputHandler.handleInput()
+        # if(command):
+        #     command.execute(self.player)
 
     def update(self):
         # We delegate store and update game data to GameState class
         self.gameState.update(self.moveCommandX, self.moveCommandY)
+        self.level.update(self.dt)
 
     def render(self):
-        self.screen.fill("black")
-        pygame.draw.circle(self.screen, "red", (self.gameState.x, self.gameState.y), 30)
+        # pygame.draw.circle(self.screen, "red", (self.gameState.x, self.gameState.y), 30)
         
         pygame.display.update()
 
