@@ -36,13 +36,13 @@ class Game():
         self.publisher.addObserver(Audio())
         self.inputHandler = InputHandler(self.screen)
 
-        self.level = Level()
-        self.player = Player(self.level.getGroups(), self.level.getCollSprites())
-        self.level.setup_level(self.player)
-
         self.running = True
         self.speed = 7
         self.dt = 0                 # delta time in seconds since last frame
+
+        self.level = Level()
+        self.player = Player(self.level.getGroups(), self.level.getCollSprites())
+        self.level.setup_level(self.player)
 
         self.moveCommandX = 0
         self.moveCommandY = 0 
@@ -61,15 +61,15 @@ class Game():
             if event.type == pygame.QUIT:
                 self.running = False
                 break
-            
+
         # command = self.inputHandler.handleInput()
         # if(command):
-        #     command.execute()
+        #     command.execute(self.player)
 
     def update(self):
         # We delegate store and update game data to GameState class
         self.gameState.update(self.moveCommandX, self.moveCommandY)
-        self.level.update()
+        self.level.update(self.dt)
 
     def render(self):
         # pygame.draw.circle(self.screen, "red", (self.gameState.x, self.gameState.y), 30)
