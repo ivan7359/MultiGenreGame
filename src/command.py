@@ -1,4 +1,5 @@
 import pygame
+import config
 
 class Command:
     def execute(self, actor = None):
@@ -39,7 +40,8 @@ class InputHandler:
         #         return self.D_command
 
         self.keys = pygame.key.get_pressed()
-
+        if self.keys[pygame.K_ESCAPE]:
+            config.state = config.UIEnum.Pause.value
         if self.keys[pygame.K_w]:
             return self.W_command
         if self.keys[pygame.K_s]:
