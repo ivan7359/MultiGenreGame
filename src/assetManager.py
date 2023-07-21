@@ -31,19 +31,25 @@ class AssetManager():
 
     def loadSounds(self):
         logging.info("LOADING SOUNDS")
-        # pygame.mixer.music.load()
-        
         self.__loadResources('sounds')
+
+        for file in self.__result:
+            tmp = file.split('/')
+            name = tmp[len(tmp) - 1].split('.')[0]
+            self.__sounds[name] = pygame.mixer.Sound(file)
+
+        self.__result.clear()
+
+        for i in self.__sounds:
+            logging.debug(i + ' = ' + str(self.__sounds[i]))
 
     def loadImages(self):
         logging.info("LOADING IMAGES")
-
         self.__loadResources('images')
         
         for file in self.__result:
             tmp = file.split('/')
             name = tmp[len(tmp) - 1].split('.')[0]
-
             self.__imgs[name] = pygame.image.load(file)
 
         self.__result.clear()
