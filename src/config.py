@@ -19,6 +19,7 @@ FPS = 60                        # limits FPS to 60
 SPEED_SCALE = 30
 
 FONT_SIZE = 16
+OFFSET = 10
 
 LEVEL_MAP = [
 '                            ',
