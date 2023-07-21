@@ -1,13 +1,12 @@
 import pygame, pygame_gui
-import logging
 
 from observer import *
 from command import *
-import config
+from assetManager import *
+from config import *
 
-WIDTH, HEIGHT = 1280, 720
-FPS = 60                        # limits FPS to 60
-SPEED_SCALE = 30
+from player import *
+from level import *
 
 class GameState():
     def __init__(self, pos):
@@ -22,10 +21,16 @@ class Game():
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        self.manager = pygame_gui.UIManager((WIDTH, HEIGHT))
-        logging.basicConfig(level=logging.DEBUG, filename="logs/logs.log",filemode="w")
-        logging.info("Game was started")
         self.clock = pygame.time.Clock()
+        
+        logging.info("Game was started")
+
+# Load all resources
+        self.assetMngr = AssetManager('media')
+        # self.assetMngr.loadImages()
+        # self.assetMngr.loadSounds()
+        # self.assetMngr.loadFonts()
+
         self.gameState = GameState(pygame.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2))
         self.publisher = Subject()
         self.publisher.addObserver(Audio())
@@ -34,6 +39,10 @@ class Game():
         self.running = True
         self.speed = 7
         self.dt = 0                 # delta time in seconds since last frame
+
+        self.level = Level()
+        self.player = Player(self.level.getGroups(), self.level.getCollSprites())
+        self.level.setup_level(self.player)
 
         self.moveCommandX = 0
         self.moveCommandY = 0 
@@ -146,97 +155,10 @@ class Game():
             if event.type == pygame.QUIT:
                 self.running = False
                 break
-            
 
-        # keys = pygame.key.get_pressed()
-
-        # if keys[pygame.K_w]:
-        #     self.moveCommandY -= self.speed * self.dt
-        #     self.publisher.notify(AudioEnum.jump.name)
-        # if keys[pygame.K_s]:
-        #     self.moveCommandY += self.speed * self.dt
-        #     self.publisher.notify(AudioEnum.run.name)
-        # if keys[pygame.K_a]:
-        #     self.moveCommandX -= self.speed * self.dt
-        #     self.publisher.notify(AudioEnum.run.name)
-        # if keys[pygame.K_d]:
-        #     self.moveCommandX += self.speed * self.dt
-        #     self.publisher.notify(AudioEnum.run.name)
-
-############################## UI Events ###############################
-            if event.type == pygame_gui.UI_BUTTON_PRESSED:
-# Maim_menu             
-              if event.ui_element == self.play_button:
-                    print('Button play was pressed!')
-                    config.state = config.UIEnum.Game.value
-              if event.ui_element == self.settings_button:
-                    config.state = config.UIEnum.Settings.value
-                    print('Button settings was pressed!')
-              if event.ui_element == self.exit_button:
-                    print('Button exit was pressed!')
-              if event.ui_element == self.info_button:
-                    print('Button info was pressed!')
-              if event.ui_element == self.left_arrow_button:
-                    print('Button left arrow was pressed!')
-              if event.ui_element == self.right_arrow_button:
-                    print('Button right arrow was pressed!')
-# Settings
-              if event.ui_element == self.info_settings_button:
-                    print('Button info was pressed!')
-              if event.ui_element == self.Back_button:
-                    config.state = config.UIEnum.Main_menu.value
-                    print('Button Back was pressed!')
-              if event.ui_element == self.OK_button:
-                    config.state = config.UIEnum.Main_menu.value
-                    print('Button OK was pressed, changes saved!')
-# Pause
-              if event.ui_element == self.continue_button:
-                    config.state = config.UIEnum.Game.value
-                    print('Button continue was pressed!')
-              if event.ui_element == self.settings_pause_button:
-                    config.state = config.UIEnum.Settings.value
-                    print('Button settings was pressed!')  
-              if event.ui_element == self.exit_pause_button:
-                    config.state = config.UIEnum.Main_menu.value
-                    print('Button exit was pressed!')
-            
-            # if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
-            #   if event.ui_element == self.slider:
-            #         print('current slider value:', event.value)
-
-            # if event.type == pygame_gui.UI_TEXT_ENTRY_CHANGED:
-            #     if event.ui_element == self.text:
-            #         print("Changed text:", event.text)
-
-            #     if event.ui_element == self.textEntryLine:
-            #         print("Changed textEntryLine:", event.text)
-
-            # if event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
-            #     print("Selected option:", event.text)
-
-            # if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
-            #     if event.ui_element == self.selectionList:
-            #         print("Selected item:", event.text)
-
-            self.manager.process_events(event)
-########################################################################
-        command = self.inputHandler.handleInput()
-        if(command):
-            command.execute()
-
-        keys = pygame.key.get_pressed()
-
-        if keys[pygame.K_w]:
-            self.moveCommandY -= self.speed * self.dt
-        if keys[pygame.K_s]:
-            self.moveCommandY += self.speed * self.dt
-        if keys[pygame.K_a]:
-            self.moveCommandX -= self.speed * self.dt
-        if keys[pygame.K_d]:
-            self.moveCommandX += self.speed * self.dt
-        
-        if keys[pygame.K_LEFT]:
-            self.CurrPercent -= 1
+        # command = self.inputHandler.handleInput()
+        # if(command):
+        #     command.execute(self.player)
 
     def update(self):
         # We delegate store and update game data to GameState class
@@ -459,10 +381,10 @@ class Game():
             self.label_controls_Weapon_change_sh.show()
             self.textEntryLine_Weapon_change_sh.show()
         self.manager.update(self.dt)
+        self.level.update(self.dt)
 
     def render(self):
-        self.screen.fill("black")
-        pygame.draw.circle(self.screen, "red", (self.gameState.x, self.gameState.y), 30)
+        # pygame.draw.circle(self.screen, "red", (self.gameState.x, self.gameState.y), 30)
         
         self.manager.draw_ui(self.screen)
         pygame.display.update()

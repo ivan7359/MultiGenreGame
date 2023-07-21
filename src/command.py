@@ -6,26 +6,39 @@ class Command:
         pass
 
 class Run(Command):
+    def __init__(self, dir):
+        self.direction = dir
+
     def execute(self, actor = None):
-        # actor.move()
+        actor.move(self.direction)
         print("run")
 
 class Jump(Command):
     def execute(self, actor = None):
-        # actor.jump()
+        actor.jump()
         print("jump")
 
 class InputHandler:
     def __init__(self, screen):
         self.W_command = Jump()
         self.S_command = Command()
-        self.A_command = Run()
-        self.D_command = Run()
+        self.A_command = Run(-1)
+        self.D_command = Run(1)
 
         self.keys = None
         self.screen = screen
 
-    def handleInput(self):
+    def handleInput(self, event = None):
+        # if event.type == pygame.KEYDOWN:
+        #     if event.key == pygame.K_w:
+        #         return self.W_command
+        #     if event.key == pygame.K_s:
+        #         return self.S_command
+        #     if event.key == pygame.K_a:
+        #         return self.A_command
+        #     if event.key == pygame.K_d:
+        #         return self.D_command
+
         self.keys = pygame.key.get_pressed()
         if self.keys[pygame.K_ESCAPE]:
             config.state = config.UIEnum.Pause.value
@@ -39,10 +52,9 @@ class InputHandler:
         if self.keys[pygame.K_d]:
             return self.D_command
         
-        if self.keys[pygame.K_1]:
-            info = pygame.display.Info() 
-            pygame.display.set_mode((info.current_w, info.current_h), pygame.FULLSCREEN)
-
+        # if self.keys[pygame.K_1]:
+        #     info = pygame.display.Info() 
+        #     pygame.display.set_mode((info.current_w, info.current_h), pygame.FULLSCREEN)
 
     def changeKeys(self, prev, curr):
         pass
