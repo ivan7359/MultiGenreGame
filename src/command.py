@@ -2,55 +2,50 @@ import pygame
 import config
 
 class Command:
-    def execute(self, actor = None):
+    def __init__(self, player):
+        self.actor = player
+
+    def execute(self):
         pass
 
 class Run(Command):
-    def __init__(self, dir):
+    def __init__(self, player, dir):
         self.direction = dir
+        self.actor = player
 
-    def execute(self, actor = None):
-        actor.move(self.direction)
+    def execute(self):
+        self.actor.move(self.direction)
         print("run")
 
 class Jump(Command):
-    def execute(self, actor = None):
-        actor.jump()
+    def __init__(self, player):
+        self.actor = player
+
+    def execute(self):
+        self.actor.jump()
         print("jump")
 
 class InputHandler:
-    def __init__(self, screen):
-        self.W_command = Jump()
-        self.S_command = Command()
-        self.A_command = Run(-1)
-        self.D_command = Run(1)
+    def __init__(self, player):
+        self.W_command = Jump(player)
+        self.S_command = Command(player)
+        self.A_command = Run(player, -1)
+        self.D_command = Run(player, 1)
 
-        self.keys = None
-        self.screen = screen
-
-    def handleInput(self, event = None):
-        # if event.type == pygame.KEYDOWN:
-        #     if event.key == pygame.K_w:
-        #         return self.W_command
-        #     if event.key == pygame.K_s:
-        #         return self.S_command
-        #     if event.key == pygame.K_a:
-        #         return self.A_command
-        #     if event.key == pygame.K_d:
-        #         return self.D_command
-
+    def handleInput(self):
         self.keys = pygame.key.get_pressed()
+
         if self.keys[pygame.K_ESCAPE]:
             config.state = config.UIEnum.Pause.value
+
         if self.keys[pygame.K_w]:
-            return self.W_command
+            self.W_command.execute()
         if self.keys[pygame.K_s]:
-            # return self.S_command
-            self.changeKeys(self.keys[pygame.K_w], self.keys[pygame.K_a])
+            self.S_command.execute()
         if self.keys[pygame.K_a]:
-            return self.A_command
+            self.A_command.execute()
         if self.keys[pygame.K_d]:
-            return self.D_command
+            self.D_command.execute()
         
         # if self.keys[pygame.K_1]:
         #     info = pygame.display.Info() 

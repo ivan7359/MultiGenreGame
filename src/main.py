@@ -19,12 +19,11 @@ class Game():
 # Load all resources
         self.assetMngr = AssetManager('media')
         # self.assetMngr.loadImages()
-        self.assetMngr.loadSounds()
+        # self.assetMngr.loadSounds()
         # self.assetMngr.loadFonts()
 
         self.publisher = Subject()
         self.publisher.addObserver(Audio())
-        self.inputHandler = InputHandler(self.screen)
 
         self.running = True
         self.speed = 7
@@ -34,6 +33,7 @@ class Game():
         self.player = Player(self.level.getGroups(), self.level.getCollSprites())
         self.level.setup_level(self.player)
 
+        self.inputHandler = InputHandler(self.player)
         self.manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
         self.createUIWidgets()
@@ -172,9 +172,11 @@ class Game():
 
             self.manager.process_events(event)
 
+        self.inputHandler.handleInput()
+
         # command = self.inputHandler.handleInput()
         # if(command):
-        #     command.execute(self.player)
+            # command.execute(self.player)
 
     def changeUIState(self):
         if (config.state == config.UIEnum.Main_menu.value):
