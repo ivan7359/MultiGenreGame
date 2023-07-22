@@ -62,7 +62,7 @@ class Player(pygame.sprite.Sprite):
 			self.on_floor = False
 
 	def update(self, dt):
-		self.input()
+		# self.input()
 		self.rect.x += self.direction.x * self.speed * dt
 		self.horizontal_collisions()
 
