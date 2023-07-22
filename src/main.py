@@ -1,4 +1,4 @@
-import pygame, pygame_gui
+import pygame, pygame_gui, json
 
 from observer import *
 from command import *
@@ -14,6 +14,9 @@ class Game():
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
         
+        self.settings = {}
+        self.controls = {}
+        self.parceJSON()
         logging.info("Game was started")
 
 # Load all resources
@@ -37,6 +40,16 @@ class Game():
         self.manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
         self.createUIWidgets()
+
+    def parceJSON(self):
+        self.settings = json.load(open("configs/settings.json", 'r'))
+        
+        for i in self.settings['controls']:
+            self.controls[i] = self.settings['controls'][i]
+
+        logging.info("------ SETTINGS ------")
+        for i in self.settings:
+            logging.debug(i + ' = ' + str(self.settings[i]))
 
     def createUIWidgets(self):
         self.CurrPercent = 70
@@ -80,17 +93,17 @@ class Game():
         
         self.settingsWidgets['Audio_label'] = pygame_gui.elements.UILabel(relative_rect=pygame.Rect(((WIDTH / 3) - label_asc_width - (OFFSET * 14) , (HEIGHT / 3) + (OFFSET * 2.2)), (label_asc_width, label_asc_height)), text="Audio", manager=self.manager)
         self.settingsWidgets['Sound_label'] = pygame_gui.elements.UILabel(relative_rect=pygame.Rect(((WIDTH / 3) - label_settings_width - (OFFSET * 6.3), (HEIGHT / 3) + (OFFSET * 6.9)), (label_settings_width, label_settings_height)), text="Sound", manager=self.manager)
-        self.settingsWidgets['Sound_slider'] = pygame_gui.elements.UIHorizontalSlider(relative_rect=pygame.Rect(((WIDTH / 3) - (OFFSET * 0.5), (HEIGHT / 3) + (OFFSET * 6.9)), (slider_width, slider_height)), start_value=0, value_range=[0, 100], manager=self.manager)
+        self.settingsWidgets['Sound_slider'] = pygame_gui.elements.UIHorizontalSlider(relative_rect=pygame.Rect(((WIDTH / 3) - (OFFSET * 0.5), (HEIGHT / 3) + (OFFSET * 6.9)), (slider_width, slider_height)), start_value=self.settings['sound'], value_range=[0, 100], manager=self.manager)
         self.settingsWidgets['Music_label'] = pygame_gui.elements.UILabel(relative_rect=pygame.Rect(((WIDTH / 3) - label_settings_width - (OFFSET * 6.3), (HEIGHT / 2) + (OFFSET * 0.8)), (label_settings_width, label_settings_height)), text="Music", manager=self.manager)
-        self.settingsWidgets['Music_slider'] = pygame_gui.elements.UIHorizontalSlider(relative_rect=pygame.Rect(((WIDTH / 3) - (OFFSET * 0.5), (HEIGHT / 2) + (OFFSET * 0.8)), (slider_width, slider_height)), start_value=0, value_range=[0, 100], manager=self.manager)
+        self.settingsWidgets['Music_slider'] = pygame_gui.elements.UIHorizontalSlider(relative_rect=pygame.Rect(((WIDTH / 3) - (OFFSET * 0.5), (HEIGHT / 2) + (OFFSET * 0.8)), (slider_width, slider_height)), start_value=self.settings['music'], value_range=[0, 100], manager=self.manager)
         
         self.settingsWidgets['Screen_label'] = pygame_gui.elements.UILabel(relative_rect=pygame.Rect(((WIDTH / 3) - label_asc_width - (OFFSET * 14) , (HEIGHT * 0.66) - (label_asc_height / 2) - (OFFSET * 1.7)), (label_asc_width, label_asc_height)), text="Screen", manager=self.manager)
         self.settingsWidgets['Resolution_label'] = pygame_gui.elements.UILabel(relative_rect=pygame.Rect(((WIDTH / 3) - label_settings_width - (OFFSET * 6.3), (HEIGHT * 0.66) + (OFFSET * 1.3)), (label_settings_width, label_settings_height)), text="Resolution", manager=self.manager)
-        self.settingsWidgets['Resolution_DDM'] = pygame_gui.elements.UIDropDownMenu(options_list=["1280 x 720", "2", "3"], starting_option="1280 x 720", relative_rect=pygame.Rect(((WIDTH / 3) - (OFFSET * 5.27), (HEIGHT * 0.66) + (OFFSET * 1.3)), (menu_width, menu_height)), manager=self.manager)
+        self.settingsWidgets['Resolution_DDM'] = pygame_gui.elements.UIDropDownMenu(options_list=["1280x720", "2", "3"], starting_option=self.settings['resolution'], relative_rect=pygame.Rect(((WIDTH / 3) - (OFFSET * 5.27), (HEIGHT * 0.66) + (OFFSET * 1.3)), (menu_width, menu_height)), manager=self.manager)
         self.settingsWidgets['Display_mode_label'] = pygame_gui.elements.UILabel(relative_rect=pygame.Rect(((WIDTH / 3) - label_settings_width - (OFFSET * 6.3), (HEIGHT * 0.66) + (OFFSET * 6.2)), (label_settings_width, label_settings_height)), text="Display mode", manager=self.manager)
-        self.settingsWidgets['Screen_DDM'] = pygame_gui.elements.UIDropDownMenu(options_list=["Fullscreen", "2", "3"], starting_option="Fullscreen", relative_rect=pygame.Rect(((WIDTH / 3) - (OFFSET * 5.27), (HEIGHT * 0.66) + (OFFSET * 6.2)), (menu_width, menu_height)), manager=self.manager)
+        self.settingsWidgets['Screen_DDM'] = pygame_gui.elements.UIDropDownMenu(options_list=["Fullscreen", "Window", "3"], starting_option=self.settings['screen'], relative_rect=pygame.Rect(((WIDTH / 3) - (OFFSET * 5.27), (HEIGHT * 0.66) + (OFFSET * 6.2)), (menu_width, menu_height)), manager=self.manager)
         self.settingsWidgets['Brightness_label'] = pygame_gui.elements.UILabel(relative_rect=pygame.Rect(((WIDTH / 3) - label_settings_width - (OFFSET * 6.3), (HEIGHT * 0.66) + (OFFSET * 11.3)), (label_settings_width, label_settings_height)), text="Brightness", manager=self.manager)
-        self.settingsWidgets['Brightness_slider'] = pygame_gui.elements.UIHorizontalSlider(relative_rect=pygame.Rect(((WIDTH / 3) - (OFFSET * 5.27), (HEIGHT * 0.66) + (OFFSET * 11.3)), (slider_width, slider_height)), start_value=0, value_range=[0, 100], manager=self.manager)
+        self.settingsWidgets['Brightness_slider'] = pygame_gui.elements.UIHorizontalSlider(relative_rect=pygame.Rect(((WIDTH / 3) - (OFFSET * 5.27), (HEIGHT * 0.66) + (OFFSET * 11.3)), (slider_width, slider_height)), start_value=self.settings['brightless'], value_range=[0, 100], manager=self.manager)
         
 
         self.settingsWidgets['Controls_label'] = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((WIDTH / 1.93, HEIGHT / 2.75), (label_asc_width, label_asc_height)), text="Controls", manager=self.manager)
@@ -105,16 +118,16 @@ class Game():
         self.settingsWidgets['Front_label'] = pygame_gui.elements.UILabel(relative_rect=pygame.Rect(((WIDTH * 0.66) - label_settings_width + (OFFSET * 0.92), (HEIGHT / 3) + (OFFSET * 13) + (label_settings_height * 8)), (label_settings_width, label_settings_height)), text="Front (shooter)", manager=self.manager)
         self.settingsWidgets['Back_label'] = pygame_gui.elements.UILabel(relative_rect=pygame.Rect(((WIDTH * 0.66) - label_settings_width + (OFFSET * 0.92), (HEIGHT / 3) + (OFFSET * 14) + (label_settings_height * 9)), (label_settings_width, label_settings_height)), text="Back (shooter)", manager=self.manager)
         
-        self.settingsWidgets['Left_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 5))), (textEntryLine_width, textEntryLine_height)), manager=self.manager)
-        self.settingsWidgets['Right_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 6) + label_settings_height)), (textEntryLine_width, textEntryLine_height)), manager=self.manager)
-        self.settingsWidgets['Jump_platformer_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 7) + label_settings_height * 2)), (textEntryLine_width, textEntryLine_height)), manager=self.manager)
-        self.settingsWidgets['Sit_down_platformer_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 8) + label_settings_height * 3)), (textEntryLine_width, textEntryLine_height)), manager=self.manager)
-        self.settingsWidgets['Fight_platformer_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 9) + label_settings_height * 4)), (textEntryLine_width, textEntryLine_height)), manager=self.manager)
-        self.settingsWidgets['Fire_platformer_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 10) + label_settings_height * 5)), (textEntryLine_width, textEntryLine_height)), manager=self.manager)
-        self.settingsWidgets['Weapon_change_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 11) + label_settings_height * 6)), (textEntryLine_width, textEntryLine_height)), manager=self.manager)
-        self.settingsWidgets['Fire_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 12) + label_settings_height * 7)), (textEntryLine_width, textEntryLine_height)), manager=self.manager)
-        self.settingsWidgets['Front_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 13) + label_settings_height * 8)), (textEntryLine_width, textEntryLine_height)), manager=self.manager)
-        self.settingsWidgets['Back_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 14) + label_settings_height * 9)), (textEntryLine_width, textEntryLine_height)), manager=self.manager)
+        self.settingsWidgets['Left_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 5))), (textEntryLine_width, textEntryLine_height)), manager=self.manager, initial_text=self.controls['left'])
+        self.settingsWidgets['Right_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 6) + label_settings_height)), (textEntryLine_width, textEntryLine_height)), manager=self.manager, initial_text=self.controls['right'])
+        self.settingsWidgets['Jump_platformer_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 7) + label_settings_height * 2)), (textEntryLine_width, textEntryLine_height)), manager=self.manager, initial_text=self.controls['jump'])
+        self.settingsWidgets['Sit_down_platformer_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 8) + label_settings_height * 3)), (textEntryLine_width, textEntryLine_height)), manager=self.manager, initial_text=self.controls['sit_down'])
+        self.settingsWidgets['Fight_platformer_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 9) + label_settings_height * 4)), (textEntryLine_width, textEntryLine_height)), manager=self.manager, initial_text=self.controls['fight'])
+        self.settingsWidgets['Fire_platformer_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 10) + label_settings_height * 5)), (textEntryLine_width, textEntryLine_height)), manager=self.manager, initial_text=self.controls['fire'])
+        self.settingsWidgets['Weapon_change_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 11) + label_settings_height * 6)), (textEntryLine_width, textEntryLine_height)), manager=self.manager, initial_text=self.controls['change_weapon'])
+        self.settingsWidgets['Fire_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 12) + label_settings_height * 7)), (textEntryLine_width, textEntryLine_height)), manager=self.manager, initial_text=self.controls['fire_shooter'])
+        self.settingsWidgets['Front_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 13) + label_settings_height * 8)), (textEntryLine_width, textEntryLine_height)), manager=self.manager, initial_text=self.controls['front'])
+        self.settingsWidgets['Back_text_line'] = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((((WIDTH * 0.66) + (OFFSET * 7), (HEIGHT / 3) + (OFFSET * 14) + label_settings_height * 9)), (textEntryLine_width, textEntryLine_height)), manager=self.manager, initial_text=self.controls['back'])
 
 # Pause
         self.pauseWidgets = {}
@@ -227,7 +240,6 @@ class Game():
                 if(len(event.text) == 1):
                     print("Back_text_line:", event.text)
             
-
     def processInput(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

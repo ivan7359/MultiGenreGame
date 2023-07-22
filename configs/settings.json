@@ -1,0 +1,19 @@
+{
+    "music": 100,
+    "sound": 100,
+    "resolution": "1280x720",
+    "screen": "Window",
+    "brightless": 100,
+    "controls": {
+        "left": "A",
+        "right": "D",
+        "jump": "W",
+        "sit_down": "S",
+        "fight": "K",
+        "fire": "L",
+        "change_weapon": "Q",
+        "fire_shooter": "LMB",
+        "front": "W",
+        "back": "S"
+    }
+}
