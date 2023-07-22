@@ -1,4 +1,4 @@
-import enum
+import enum, logging
 
 class UIEnum(enum.Enum):
     Main_menu = 0
@@ -8,16 +8,13 @@ class UIEnum(enum.Enum):
     Game = 4
 
 state = UIEnum.Main_menu.value
-import logging
 
 logging.basicConfig(level= logging.DEBUG, filename= "logs/logs.log", filemode= "w")
 
 TILE_SIZE = 64
-
 WIDTH, HEIGHT = 1280, 720
 FPS = 60                        # limits FPS to 60
 SPEED_SCALE = 30
-
 FONT_SIZE = 16
 OFFSET = 10
 
@@ -40,3 +37,6 @@ CAMERA_BORDERS = {
 	'top':100,
 	'bottom': 150
 }
+
+curr_window_width = WIDTH
+curr_window_height = HEIGHT

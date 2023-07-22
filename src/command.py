@@ -48,8 +48,8 @@ class InputHandler:
             self.D_command.execute()
         
         # if self.keys[pygame.K_1]:
-        #     info = pygame.display.Info() 
-        #     pygame.display.set_mode((info.current_w, info.current_h), pygame.FULLSCREEN)
+            # info = pygame.display.Info() 
+            # pygame.display.set_mode((info.current_w, info.current_h), pygame.FULLSCREEN)
 
     def changeKeys(self, prev, curr):
         pass
