@@ -1,24 +1,19 @@
-import enum
+from config import *
 
-class AudioEnum(enum.Enum):
-    background = 0
-    run = 1
-    jump = 2
-    beat = 3
-    damage = 4
-    
 class Observer:
     def onNotify(self):
         pass
 
 class Audio(Observer):
-    def onNotify(self, sound):
-        if(sound == AudioEnum.run.name):
-            print("play 'run'")
-        if(sound == AudioEnum.jump.name):
-            print("play 'jump'")
-        if(sound == AudioEnum.beat.name):
-            print("play 'beat'")
+    def __init__(self, assetManager):
+        self.__assetManager = assetManager
+
+    def onNotify(self, event):
+        if (event == EventsEnum.movement.value):
+            self.__assetManager.getSound('Running').play()
+
+        if (event == EventsEnum.jump.value):
+            self.__assetManager.getSound('Jump').play()
 
 class Subject:
     def __init__(self):

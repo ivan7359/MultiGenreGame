@@ -10,7 +10,10 @@ from level import *
 
 class Game():
     def __init__(self):
+        pygame.mixer.pre_init(44100, -16, 2, 512)
         pygame.init()
+        pygame.mixer.set_num_channels(64)
+
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
         
@@ -22,24 +25,25 @@ class Game():
 # Load all resources
         self.assetMngr = AssetManager('media')
         # self.assetMngr.loadImages()
-        # self.assetMngr.loadSounds()
+        self.assetMngr.loadSounds()
         # self.assetMngr.loadFonts()
 
         self.publisher = Subject()
-        self.publisher.addObserver(Audio())
+        self.publisher.addObserver(Audio(self.assetMngr))
 
         self.running = True
         self.speed = 7
         self.dt = 0                 # delta time in seconds since last frame
 
         self.level = Level()
-        self.player = Player(self.level.getGroups(), self.level.getCollSprites())
+        self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher)
         self.level.setup_level(self.player)
 
-        self.inputHandler = InputHandler(self.player)
+        self.inputHandler = InputHandler(self.player, self.publisher)
         self.manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
         self.createUIWidgets()
+        # self.assetMngr.getSound('Main_menu').play()
 
     def parceJSON(self):
         self.settings = json.load(open("configs/settings.json", 'r'))
@@ -102,8 +106,6 @@ class Game():
         self.settingsWidgets['Resolution_DDM'] = pygame_gui.elements.UIDropDownMenu(options_list=["480x640", "800x600", "1280x720", "1920x1080"], starting_option=self.settings['resolution'], relative_rect=pygame.Rect(((WIDTH / 3) - (OFFSET * 5.27), (HEIGHT * 0.66) + (OFFSET * 1.3)), (menu_width, menu_height)), manager=self.manager)
         self.settingsWidgets['Display_mode_label'] = pygame_gui.elements.UILabel(relative_rect=pygame.Rect(((WIDTH / 3) - label_settings_width - (OFFSET * 6.3), (HEIGHT * 0.66) + (OFFSET * 6.2)), (label_settings_width, label_settings_height)), text="Display mode", manager=self.manager)
         self.settingsWidgets['Screen_DDM'] = pygame_gui.elements.UIDropDownMenu(options_list=["Fullscreen", "Window", "Resizable"], starting_option=self.settings['screen'], relative_rect=pygame.Rect(((WIDTH / 3) - (OFFSET * 5.27), (HEIGHT * 0.66) + (OFFSET * 6.2)), (menu_width, menu_height)), manager=self.manager)
-        self.settingsWidgets['Brightness_label'] = pygame_gui.elements.UILabel(relative_rect=pygame.Rect(((WIDTH / 3) - label_settings_width - (OFFSET * 6.3), (HEIGHT * 0.66) + (OFFSET * 11.3)), (label_settings_width, label_settings_height)), text="Brightness", manager=self.manager)
-        self.settingsWidgets['Brightness_slider'] = pygame_gui.elements.UIHorizontalSlider(relative_rect=pygame.Rect(((WIDTH / 3) - (OFFSET * 5.27), (HEIGHT * 0.66) + (OFFSET * 11.3)), (slider_width, slider_height)), start_value=self.settings['brightless'], value_range=[0, 100], manager=self.manager)
         
 
         self.settingsWidgets['Controls_label'] = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((WIDTH / 1.93, HEIGHT / 2.75), (label_asc_width, label_asc_height)), text="Controls", manager=self.manager)
@@ -192,11 +194,9 @@ class Game():
                 print('Button exit was pressed!')
 
         if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
-            if event.ui_element == self.settingsWidgets['Brightness_slider']:
-                print('Brightness_slider:', event.value)
-            
             if event.ui_element == self.settingsWidgets['Sound_slider']:
-                print('Sound_slider:', event.value)
+                pygame.mixer.music.set_volume(event.value / 100)
+                print('Sound_slider:', event.value / 100)
 
             if event.ui_element == self.settingsWidgets['Music_slider']:
                 print('Music_slider:', event.value)
@@ -226,13 +226,12 @@ class Game():
                 break
         
             self.UIEvents(event)
-
             self.manager.process_events(event)
-
-        self.inputHandler.handleInput()
+            self.inputHandler.handleInput(event, self.controls)
 
     def changeUIState(self):
         if (config.state == config.UIEnum.Main_menu.value):
+
             for widget in self.mainMenuWidgets:
                 self.mainMenuWidgets[widget].show()
 

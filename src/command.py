@@ -13,8 +13,8 @@ class Run(Command):
         self.direction = dir
         self.actor = player
 
-    def execute(self):
-        self.actor.move(self.direction)
+    def execute(self, isMoving):
+        self.actor.move(self.direction, isMoving)
         print("run")
 
 class Jump(Command):
@@ -26,30 +26,39 @@ class Jump(Command):
         print("jump")
 
 class InputHandler:
-    def __init__(self, player):
+    def __init__(self, player, publisher):
+        self.publisher = publisher
+
         self.W_command = Jump(player)
         self.S_command = Command(player)
         self.A_command = Run(player, -1)
         self.D_command = Run(player, 1)
 
-    def handleInput(self):
-        self.keys = pygame.key.get_pressed()
+    def handleInput(self, event, controls):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.key.key_code(controls['jump']):
+                self.W_command.execute()
 
-        if self.keys[pygame.K_ESCAPE]:
-            config.state = config.UIEnum.Pause.value
+            if event.key == pygame.key.key_code(controls['sit_down']):
+                self.S_command.execute()
 
-        if self.keys[pygame.K_w]:
-            self.W_command.execute()
-        if self.keys[pygame.K_s]:
-            self.S_command.execute()
-        if self.keys[pygame.K_a]:
-            self.A_command.execute()
-        if self.keys[pygame.K_d]:
-            self.D_command.execute()
-        
-        # if self.keys[pygame.K_1]:
-            # info = pygame.display.Info() 
-            # pygame.display.set_mode((info.current_w, info.current_h), pygame.FULLSCREEN)
+            if event.key == pygame.key.key_code(controls['left']):
+                self.A_command.execute(True)
 
-    def changeKeys(self, prev, curr):
-        pass
+            if event.key == pygame.key.key_code(controls['right']):
+                self.D_command.execute(True)
+
+            
+            if event.key == pygame.K_ESCAPE:
+                config.state = config.UIEnum.Pause.value
+
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.key.key_code(controls['sit_down']):
+                self.S_command.execute(False)
+
+            if event.key == pygame.key.key_code(controls['left']):
+                self.A_command.execute(False)
+
+            if event.key == pygame.key.key_code(controls['right']):
+                self.D_command.execute(False)
+

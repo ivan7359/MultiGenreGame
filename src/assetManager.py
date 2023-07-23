@@ -1,5 +1,4 @@
-import pygame
-import os
+import pygame, os
 
 from config import *
 
@@ -37,6 +36,7 @@ class AssetManager():
             tmp = file.split('/')
             name = tmp[len(tmp) - 1].split('.')[0]
             self.__sounds[name] = pygame.mixer.Sound(file)
+            # self.__sounds[name] = file
 
         self.__result.clear()
 

@@ -7,6 +7,11 @@ class UIEnum(enum.Enum):
     Pause = 3
     Game = 4
 
+class EventsEnum(enum.Enum):
+    movement = 0
+    jump = 1
+    achievement = 2
+
 state = UIEnum.Main_menu.value
 
 logging.basicConfig(level= logging.DEBUG, filename= "logs/logs.log", filemode= "w")
