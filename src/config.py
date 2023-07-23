@@ -13,6 +13,8 @@ class ListLevel(enum.Enum):
     Platformer = 2
 
 state = UIEnum.Main_menu.value
+prev_state = state
+
 import logging
 
 logging.basicConfig(level= logging.DEBUG, filename= "logs/logs.log", filemode= "w")

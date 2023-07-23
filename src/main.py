@@ -149,6 +149,7 @@ class Game():
                 config.state = config.UIEnum.Game.value
 
             if event.ui_element == self.mainMenuWidgets['settings_button']:
+                config.prev_state = config.state
                 config.state = config.UIEnum.Settings.value
 
             if event.ui_element == self.mainMenuWidgets['exit_button']:
@@ -173,18 +174,20 @@ class Game():
             # Settings
             if event.ui_element == self.settingsWidgets['info_settings_button']:
                 print('Button info was pressed!')
+
             if event.ui_element == self.settingsWidgets['Back_button']:
-                config.state = config.UIEnum.Main_menu.value
+                config.state = config.prev_state
+                
                 print('Button Back was pressed!')
             if event.ui_element == self.settingsWidgets['OK_button']:
-                config.state = config.UIEnum.Main_menu.value
-                print('Button OK was pressed, changes saved!')
+                config.state = config.prev_state
             
             # Pause
             if event.ui_element == self.pauseWidgets['continue_button']:
                 config.state = config.UIEnum.Game.value
 
             if event.ui_element == self.pauseWidgets['settings_pause_button']:
+                config.prev_state = config.state
                 config.state = config.UIEnum.Settings.value
 
             if event.ui_element == self.pauseWidgets['exit_pause_button']:
