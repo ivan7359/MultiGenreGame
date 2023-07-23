@@ -1,4 +1,4 @@
-import pygame, pygame_gui, json
+import pygame, pygame_gui, json, threading
 
 from observer import *
 from command import *
@@ -43,7 +43,11 @@ class Game():
         self.manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
         self.createUIWidgets()
-        # self.assetMngr.getSound('Main_menu').play()
+        threading.Thread(target=self.playBgMusic).start()
+
+    def playBgMusic(self):
+        self.backgroundMusic = self.assetMngr.getSound('Main_menu')
+        self.backgroundMusic.play(-1)
 
     def parceJSON(self):
         self.settings = json.load(open("configs/settings.json", 'r'))
@@ -195,11 +199,15 @@ class Game():
 
         if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
             if event.ui_element == self.settingsWidgets['Sound_slider']:
-                pygame.mixer.music.set_volume(event.value / 100)
+                bgMusicValue = self.backgroundMusic.get_volume()
+                self.assetMngr.setAllVolumes(event.value / 100)
+                self.assetMngr.setSoundVolume(self.backgroundMusic, bgMusicValue)
                 print('Sound_slider:', event.value / 100)
 
             if event.ui_element == self.settingsWidgets['Music_slider']:
-                print('Music_slider:', event.value)
+                self.assetMngr.setSoundVolume(self.backgroundMusic, event.value / 100)
+                print('Music_slider:', event.value / 100)
+
 
         if event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
             if (event.ui_element == self.settingsWidgets['Resolution_DDM']):
@@ -286,9 +294,9 @@ class Game():
                 self.pauseWidgets[widget].hide()
 
     def update(self):
-        self.manager.update(self.dt)
         self.level.update(self.dt)
         self.changeUIState()
+        self.manager.update(self.dt)
 
     def render(self):
         self.manager.draw_ui(self.screen)

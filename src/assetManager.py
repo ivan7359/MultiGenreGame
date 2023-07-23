@@ -1,5 +1,4 @@
 import pygame, os
-
 from config import *
 
 class AssetManager():
@@ -75,3 +74,10 @@ class AssetManager():
     
     def getFont(self, font):
         return self.__fonts[font]
+
+    def setAllVolumes(self, value):
+        for sound in self.__sounds:
+            self.__sounds[sound].set_volume(value)
+
+    def setSoundVolume(self, sound, value):
+        sound.set_volume(value)
