@@ -1,9 +1,12 @@
 import pygame
 from config import *
 
+SOUND_PLAYING_DELAY = 30 
+
 class Player(pygame.sprite.Sprite):
-	def __init__(self, groups, collision_sprites):
+	def __init__(self, groups, collision_sprites, publisher):
 		super().__init__(groups)
+		self.publisher = publisher
 		self.image = pygame.Surface((TILE_SIZE // 2,TILE_SIZE))
 		self.image.fill('green')
 		self.rect = self.image.get_rect(center = (0, 0))
@@ -15,25 +18,18 @@ class Player(pygame.sprite.Sprite):
 		self.jump_speed = 16
 		self.collision_sprites = collision_sprites
 		self.on_floor = False
+		self.isMoving = False
+		self.movement_sound_timer = 0
 
-	def move(self, direction):
+
+	def move(self, direction, isMoving):
+		self.isMoving = isMoving
 		self.direction.x = direction
 
 	def jump(self):
 		if(self.on_floor == True):
+			self.publisher.notify(EventsEnum.jump.value)
 			self.direction.y = -self.jump_speed
-
-	def input(self):
-		keys = pygame.key.get_pressed()
-
-		if keys[pygame.K_d]:
-			self.direction.x = 1
-		if keys[pygame.K_a]:
-			self.direction.x = -1
-
-		if keys[pygame.K_w]:
-			if(self.on_floor == True):
-				self.direction.y = -self.jump_speed
 
 	def setPos(self, x, y):
 		self.rect.x = x
@@ -62,13 +58,20 @@ class Player(pygame.sprite.Sprite):
 			self.on_floor = False
 
 	def update(self, dt):
-		# self.input()
-		self.rect.x += self.direction.x * self.speed * dt
-		self.horizontal_collisions()
+		if self.movement_sound_timer > 0:
+			self.movement_sound_timer -= 1
+	    
+		if(self.isMoving == True):
+			if self.movement_sound_timer == 0 and self.on_floor == True:
+				self.movement_sound_timer = SOUND_PLAYING_DELAY
+				self.publisher.notify(EventsEnum.movement.value)
+	
+			self.rect.x += self.direction.x * self.speed * dt
+			self.horizontal_collisions()
 
-		self.direction.y += self.gravity
-		self.rect.y += self.direction.y * dt
+		if(self.on_floor == False):
+			self.direction.y += self.gravity
+			self.rect.y += self.direction.y * dt
+		
 		self.vertical_collisions()
-
-		self.direction.x = 0
-		# self.direction.y = 0
+ 
