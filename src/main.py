@@ -34,12 +34,15 @@ class Game():
         self.running = True
         self.speed = 7
         self.dt = 0                 # delta time in seconds since last frame
+        self.currentLevel = 0
+        self.iterator = 0
 
-        self.level = Level()
-        self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher)
-        self.level.setup_level(self.player)
+        # self.level = Level()
+        # self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher)
+        # self.level.setup_level(self.player)
 
-        self.inputHandler = InputHandler(self.player, self.publisher)
+        # self.inputHandler = InputHandler(self.player, self.publisher)
+
         self.manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
         self.createUIWidgets()
@@ -159,17 +162,29 @@ class Game():
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             # Main_menu             
             if event.ui_element == self.mainMenuWidgets['play_button']:
-                print('Button play was pressed!')
                 config.state = config.UIEnum.Game.value
+
             if event.ui_element == self.mainMenuWidgets['settings_button']:
                 config.state = config.UIEnum.Settings.value
-                print('Button settings was pressed!')
+
             if event.ui_element == self.mainMenuWidgets['exit_button']:
-                print('Button exit was pressed!')
+                self.running = False
+
             if event.ui_element == self.mainMenuWidgets['left_arrow_button']:
-                print('Button left arrow was pressed!')
+                if (self.iterator == 0):
+                    self.iterator = 2
+                else:
+                    self.iterator -= 1
+
+                print(self.iterator)
+
             if event.ui_element == self.mainMenuWidgets['right_arrow_button']:
-                print('Button right arrow was pressed!')
+                if (self.iterator == 2):
+                    self.iterator = 0
+                else:
+                    self.iterator += 1
+
+                print(self.iterator)
             
             # Settings
             if event.ui_element == self.settingsWidgets['info_settings_button']:
@@ -189,13 +204,12 @@ class Game():
             # Pause
             if event.ui_element == self.pauseWidgets['continue_button']:
                 config.state = config.UIEnum.Game.value
-                print('Button continue was pressed!')
+
             if event.ui_element == self.pauseWidgets['settings_pause_button']:
                 config.state = config.UIEnum.Settings.value
-                print('Button settings was pressed!')  
+
             if event.ui_element == self.pauseWidgets['exit_pause_button']:
                 config.state = config.UIEnum.Main_menu.value
-                print('Button exit was pressed!')
 
         if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
             if event.ui_element == self.settingsWidgets['Sound_slider']:
@@ -235,7 +249,11 @@ class Game():
         
             self.UIEvents(event)
             self.manager.process_events(event)
-            self.inputHandler.handleInput(event, self.controls)
+
+            if(config.state == config.UIEnum.Game.value):
+                if(self.currentLevel == 1):
+                    self.inputHandler = InputHandler(self.player, self.publisher)
+                    self.inputHandler.handleInput(event, self.controls)
 
     def changeUIState(self):
         if (config.state == config.UIEnum.Main_menu.value):
@@ -264,6 +282,22 @@ class Game():
 
             for widget in self.pauseWidgets:
                 self.pauseWidgets[widget].hide()
+
+            if (self.iterator == ListLevel.Strategy.value):
+                pass
+
+            if (self.iterator == ListLevel.Shooter.value):
+                pass
+
+            if (self.iterator == ListLevel.Platformer.value):
+                if(self.currentLevel == 0):
+                    self.level = Level()
+                    self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher)
+                    self.level.setup_level(self.player)
+                    self.currentLevel = 1
+
+                if (self.currentLevel == 1):
+                    self.level.update(self.dt)
 
         if (config.state == config.UIEnum.Pause.value):
             for widget in self.mainMenuWidgets:
@@ -294,7 +328,7 @@ class Game():
                 self.pauseWidgets[widget].hide()
 
     def update(self):
-        self.level.update(self.dt)
+        self.screen.fill("black")
         self.changeUIState()
         self.manager.update(self.dt)
 
