@@ -37,12 +37,6 @@ class Game():
         self.currentLevel = 0
         self.iterator = 0
 
-        # self.level = Level()
-        # self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher)
-        # self.level.setup_level(self.player)
-
-        # self.inputHandler = InputHandler(self.player, self.publisher)
-
         self.manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
         self.createUIWidgets()
