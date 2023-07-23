@@ -11,13 +11,14 @@ class EventsEnum(enum.Enum):
     movement = 0
     jump = 1
     achievement = 2
-    
+
 class ListLevel(enum.Enum):
     Strategy = 0
     Shooter = 1
     Platformer = 2
 
 state = UIEnum.Main_menu.value
+prev_state = state
 
 logging.basicConfig(level= logging.DEBUG, filename= "logs/logs.log", filemode= "w")
 
