@@ -38,7 +38,6 @@ class Level:
 		return self.collision_sprites
 
 	def update(self, dt):
-		self.display_surface.fill("black")
 		self.active_sprites.update(dt)
 		self.visible_sprites.custom_draw(self.player)
 

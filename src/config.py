@@ -7,6 +7,11 @@ class UIEnum(enum.Enum):
     Pause = 3
     Game = 4
 
+class ListLevel(enum.Enum):
+    Strategy = 0
+    Shooter = 1
+    Platformer = 2
+
 state = UIEnum.Main_menu.value
 import logging
 
