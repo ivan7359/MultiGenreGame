@@ -18,16 +18,38 @@ class Level:
 		self.active_sprites = pygame.sprite.Group()
 		self.collision_sprites = pygame.sprite.Group()
 
+	def parceTXT(self):
+		self.file1 = open("configs/levelPlatformer.txt", "r")
+		self.levelMap = []
+
+		while True:
+			self.line = self.file1.readline()
+
+			if not self.line:
+				break
+			
+			tmp = []
+
+			for j in range(len(self.line)):
+				if self.line[j] != "," and self.line[j] != "\n":
+					tmp.append(self.line[j])
+
+			self.levelMap.append(tmp)
+
+		self.file1.close()
+
 	def setup_level(self, player):
 		self.player = player
+		self.parceTXT()
 
-		for row_index,row in enumerate(LEVEL_MAP):
+		# for row_index,row in enumerate(self.matrix):
+		for row_index,row in enumerate(self.levelMap):
 			for col_index,col in enumerate(row):
 				x = col_index * TILE_SIZE
 				y = row_index * TILE_SIZE
-				if col == 'X':
+				if col == "1":
 					Tile((x,y),[self.visible_sprites, self.collision_sprites])
-				if col == 'P':
+				if col == '7':
 					player.setPos(x, y)
 					# self.player = Player((x,y),[self.visible_sprites,self.active_sprites],self.collision_sprites)
 

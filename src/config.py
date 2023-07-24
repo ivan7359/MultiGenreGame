@@ -22,25 +22,12 @@ prev_state = state
 
 logging.basicConfig(level= logging.DEBUG, filename= "logs/logs.log", filemode= "w")
 
-TILE_SIZE = 64
+TILE_SIZE = 32
 WIDTH, HEIGHT = 1280, 720
 FPS = 60                        # limits FPS to 60
 SPEED_SCALE = 30
 FONT_SIZE = 16
 OFFSET = 10
-
-LEVEL_MAP = [
-'                            ',
-'                            ',
-'                            ',
-'                            ',
-'   P                        ',
-'                            ',
-'                            ',
-'                            ',
-'                            ',
-'    XXXX  XXXXXX  XX  XXXX  ',
-'XXXXXXXXXXXXXXXXXXXXXXXXXXXX']
 
 CAMERA_BORDERS = {
 	'left': 100,
