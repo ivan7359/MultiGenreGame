@@ -18,6 +18,7 @@ class Player(pygame.sprite.Sprite):
 		self.jump_speed = 16
 		self.collision_sprites = collision_sprites
 		self.on_floor = False
+		self.countJump = 2
 		self.isMoving = False
 		self.movement_sound_timer = 0
 
@@ -30,7 +31,11 @@ class Player(pygame.sprite.Sprite):
 		if(self.on_floor == True):
 			self.publisher.notify(EventsEnum.jump.value)
 			self.direction.y = -self.jump_speed
-
+			self.countJump = self.countJump - 1
+		if(self.on_floor == False and self.countJump > 0):
+			self.direction.y = -self.jump_speed
+			self.countJump = self.countJump - 1
+		
 	def setPos(self, x, y):
 		self.rect.x = x
 		self.rect.y = y
@@ -50,6 +55,7 @@ class Player(pygame.sprite.Sprite):
 					self.rect.bottom = sprite.rect.top
 					self.direction.y = 0
 					self.on_floor = True
+					self.countJump = 2
 				if self.direction.y < 0:
 					self.rect.top = sprite.rect.bottom
 					self.direction.y = 0
