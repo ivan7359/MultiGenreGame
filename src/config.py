@@ -29,6 +29,8 @@ SPEED_SCALE = 30
 FONT_SIZE = 16
 OFFSET = 10
 
+savedValues = {}
+
 LEVEL_MAP = [
 '                            ',
 '                            ',
@@ -38,7 +40,7 @@ LEVEL_MAP = [
 '                            ',
 '                            ',
 '                            ',
-'                            ',
+'      C      C          C   ',
 '    XXXX  XXXXXX  XX  XXXX  ',
 'XXXXXXXXXXXXXXXXXXXXXXXXXXXX']
 
