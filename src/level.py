@@ -51,6 +51,8 @@ class Level:
 					Tile((x,y),[self.visible_sprites, self.collision_sprites])
 				if col == '7':
 					player.setPos(x, y)
+				if col == "C":
+					pass
 					# self.player = Player((x,y),[self.visible_sprites,self.active_sprites],self.collision_sprites)
 
 	def getGroups(self):

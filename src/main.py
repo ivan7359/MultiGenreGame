@@ -25,7 +25,7 @@ class Game():
 # Load all resources
         self.assetMngr = AssetManager('media')
         # self.assetMngr.loadImages()
-        self.assetMngr.loadSounds()
+        # self.assetMngr.loadSounds()
         # self.assetMngr.loadFonts()
 
         self.publisher = Subject()
@@ -42,6 +42,21 @@ class Game():
         self.createUIWidgets()
         threading.Thread(target=self.playBgMusic).start()
 
+    def loadProgress(self):
+        with open("configs\savefile.txt", "r") as f:
+            while True:
+                line = f.readline()
+                if not line:
+                    break
+                tmp = line.split(' = ')
+                savedValues[tmp[0]] = tmp[1]
+    
+    def saveProgress(self):
+        with open("configs\savefile.txt", "w") as f:
+            for i in savedValues:
+                string = i + " = " + savedValues[i]
+                f.write(string)
+    
     def playBgMusic(self):
         self.backgroundMusic = self.assetMngr.getSound('Main_menu')
         self.backgroundMusic.play(-1)
@@ -294,6 +309,8 @@ class Game():
                     self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher)
                     self.level.setup_level(self.player)
                     self.currentLevel = 1
+                    self.loadProgress()
+                    logging.info(str(savedValues))
 
                 if (self.currentLevel == 1):
                     self.level.update(self.dt)
