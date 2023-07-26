@@ -12,36 +12,51 @@ class Tile(pygame.sprite.Sprite):
 class Level:
 	def __init__(self):
 		self.display_surface = pygame.display.get_surface()
+		self.levelMap = []
 		
 		# sprite group setup
 		self.visible_sprites = CameraGroup()
 		self.active_sprites = pygame.sprite.Group()
 		self.collision_sprites = pygame.sprite.Group()
 
-	def parceTXT(self):
-		self.file1 = open("configs/levelPlatformer.txt", "r")
-		self.levelMap = []
+	def parceTXT(self, path):
+		with open(path, "r") as f:
 
-		while True:
-			self.line = self.file1.readline()
+			while True:
+				line = f.readline()
 
-			if not self.line:
-				break
-			
-			tmp = []
+				if not line:
+					break
+				
+				self.levelMap.append(line.split(','))
 
-			for j in range(len(self.line)):
-				if self.line[j] != "," and self.line[j] != "\n":
-					tmp.append(self.line[j])
-
-			self.levelMap.append(tmp)
-
-		self.file1.close()
-
-	def setup_level(self, player):
+	def setup_level(self, player, currentLevel, path):
 		self.player = player
-		self.parceTXT()
+		self.parceTXT(path)
 
+		if (currentLevel == LevelEnum.Strategy.value):
+			print("strategyLoader")
+			self.strategyLoader()
+
+		if (currentLevel == LevelEnum.Shooter.value):
+			pass
+
+		if (currentLevel == LevelEnum.Platformer.value):
+			print("platformerLoader")
+			self.platformerLoader()
+
+	def strategyLoader(self):
+		# for row_index,row in enumerate(self.matrix):
+		for row_index,row in enumerate(self.levelMap):
+			for col_index,col in enumerate(row):
+				x = col_index * TILE_SIZE
+				y = row_index * TILE_SIZE
+				if col == '866':
+					Tile((x,y),[self.visible_sprites, self.collision_sprites])
+				if col == '0':
+					self.player.setPos(x, y)
+
+	def platformerLoader(self):
 		# for row_index,row in enumerate(self.matrix):
 		for row_index,row in enumerate(self.levelMap):
 			for col_index,col in enumerate(row):
@@ -50,7 +65,7 @@ class Level:
 				if col == "1":
 					Tile((x,y),[self.visible_sprites, self.collision_sprites])
 				if col == '7':
-					player.setPos(x, y)
+					self.player.setPos(x, y)
 				if col == "C":
 					pass
 					# self.player = Player((x,y),[self.visible_sprites,self.active_sprites],self.collision_sprites)

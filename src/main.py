@@ -1,9 +1,9 @@
 import pygame, pygame_gui, json, threading
+import config 
 
 from observer import *
 from command import *
 from assetManager import *
-from config import *
 
 from player import *
 from level import *
@@ -25,7 +25,7 @@ class Game():
 # Load all resources
         self.assetMngr = AssetManager('media')
         # self.assetMngr.loadImages()
-        # self.assetMngr.loadSounds()
+        self.assetMngr.loadSounds()
         # self.assetMngr.loadFonts()
 
         self.publisher = Subject()
@@ -34,8 +34,9 @@ class Game():
         self.running = True
         self.speed = 7
         self.dt = 0                 # delta time in seconds since last frame
+        self.isLevelInit = False
+        # self.currentLevel = config.LevelEnum.Strategy.value
         self.currentLevel = 0
-        self.iterator = 0
 
         self.manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
@@ -43,7 +44,7 @@ class Game():
         threading.Thread(target=self.playBgMusic).start()
 
     def loadProgress(self):
-        with open("configs\savefile.txt", "r") as f:
+        with open("configs/savefile.txt", "r") as f:
             while True:
                 line = f.readline()
                 if not line:
@@ -52,7 +53,7 @@ class Game():
                 savedValues[tmp[0]] = tmp[1]
     
     def saveProgress(self):
-        with open("configs\savefile.txt", "w") as f:
+        with open("configs/savefile.txt", "w") as f:
             for i in savedValues:
                 string = i + " = " + savedValues[i]
                 f.write(string)
@@ -181,20 +182,20 @@ class Game():
                 self.running = False
 
             if event.ui_element == self.mainMenuWidgets['left_arrow_button']:
-                if (self.iterator == 0):
-                    self.iterator = 2
+                if (self.currentLevel == 0):
+                    self.currentLevel = 2
                 else:
-                    self.iterator -= 1
+                    self.currentLevel -= 1
 
-                print(self.iterator)
+                print(self.currentLevel)
 
             if event.ui_element == self.mainMenuWidgets['right_arrow_button']:
-                if (self.iterator == 2):
-                    self.iterator = 0
+                if (self.currentLevel == 2):
+                    self.currentLevel = 0
                 else:
-                    self.iterator += 1
+                    self.currentLevel += 1
 
-                print(self.iterator)
+                print(self.currentLevel)
             
             # Settings
             if event.ui_element == self.settingsWidgets['info_settings_button']:
@@ -265,8 +266,8 @@ class Game():
             self.manager.process_events(event)
 
             if(config.state == config.UIEnum.Game.value):
-                if(self.currentLevel == 1):
-                    self.inputHandler = InputHandler(self.player, self.publisher)
+                if(self.isLevelInit == True):
+                    self.inputHandler = InputHandler(self.player, self.publisher, self.currentLevel)
                     self.inputHandler.handleInput(event, self.controls)
 
     def changeUIState(self):
@@ -297,22 +298,29 @@ class Game():
             for widget in self.pauseWidgets:
                 self.pauseWidgets[widget].hide()
 
-            if (self.iterator == ListLevel.Strategy.value):
-                pass
-
-            if (self.iterator == ListLevel.Shooter.value):
-                pass
-
-            if (self.iterator == ListLevel.Platformer.value):
-                if(self.currentLevel == 0):
+            if (self.currentLevel == LevelEnum.Strategy.value):
+                if(self.isLevelInit == False):
                     self.level = Level()
-                    self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher)
-                    self.level.setup_level(self.player)
-                    self.currentLevel = 1
+                    self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher, self.currentLevel)
+                    self.level.setup_level(self.player, self.currentLevel, "configs/strategy.txt")
+                    self.isLevelInit = True
+
+                if (self.isLevelInit == True):
+                    self.level.update(self.dt)
+
+            if (self.currentLevel == LevelEnum.Shooter.value):
+                pass
+
+            if (self.currentLevel == LevelEnum.Platformer.value):
+                if(self.isLevelInit == False):
+                    self.level = Level()
+                    self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher, self.currentLevel)
+                    self.level.setup_level(self.player, self.currentLevel, "configs/levelPlatformer.txt")
                     self.loadProgress()
                     logging.info(str(savedValues))
+                    self.isLevelInit = True
 
-                if (self.currentLevel == 1):
+                if (self.isLevelInit == True):
                     self.level.update(self.dt)
 
         if (config.state == config.UIEnum.Pause.value):

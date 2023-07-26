@@ -12,13 +12,15 @@ class EventsEnum(enum.Enum):
     jump = 1
     achievement = 2
 
-class ListLevel(enum.Enum):
+class LevelEnum(enum.Enum):
     Strategy = 0
     Shooter = 1
     Platformer = 2
 
 state = UIEnum.Main_menu.value
 prev_state = state
+
+savedValues = {}
 
 logging.basicConfig(level= logging.DEBUG, filename= "logs/logs.log", filemode= "w")
 
@@ -28,6 +30,7 @@ FPS = 60                        # limits FPS to 60
 SPEED_SCALE = 30
 FONT_SIZE = 16
 OFFSET = 10
+SOUND_PLAYING_DELAY = 30 
 
 CAMERA_BORDERS = {
 	'left': 100,
