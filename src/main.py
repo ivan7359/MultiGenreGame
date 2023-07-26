@@ -1,9 +1,9 @@
 import pygame, pygame_gui, json, threading
+import config 
 
 from observer import *
 from command import *
 from assetManager import *
-from config import *
 
 from player import *
 from level import *
@@ -267,7 +267,7 @@ class Game():
 
             if(config.state == config.UIEnum.Game.value):
                 if(self.isLevelInit == True):
-                    self.inputHandler = InputHandler(self.player, self.publisher)
+                    self.inputHandler = InputHandler(self.player, self.publisher, self.currentLevel)
                     self.inputHandler.handleInput(event, self.controls)
 
     def changeUIState(self):
@@ -301,9 +301,8 @@ class Game():
             if (self.currentLevel == LevelEnum.Strategy.value):
                 if(self.isLevelInit == False):
                     self.level = Level()
-                    self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher)
+                    self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher, self.currentLevel)
                     self.level.setup_level(self.player, self.currentLevel, "configs/strategy.txt")
-
                     self.isLevelInit = True
 
                 if (self.isLevelInit == True):
@@ -315,11 +314,10 @@ class Game():
             if (self.currentLevel == LevelEnum.Platformer.value):
                 if(self.isLevelInit == False):
                     self.level = Level()
-                    self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher)
+                    self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher, self.currentLevel)
                     self.level.setup_level(self.player, self.currentLevel, "configs/levelPlatformer.txt")
                     self.loadProgress()
                     logging.info(str(savedValues))
-                    
                     self.isLevelInit = True
 
                 if (self.isLevelInit == True):
