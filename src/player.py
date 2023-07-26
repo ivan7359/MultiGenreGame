@@ -75,9 +75,11 @@ class Player(pygame.sprite.Sprite):
 			self.rect.x += self.direction.x * self.speed * dt
 			self.horizontal_collisions()
 
-		if(self.on_floor == False):
-			self.direction.y += self.gravity
-			self.rect.y += self.direction.y * dt
+		# if(self.on_floor == False):
+			# self.direction.y += self.gravity
+			# self.rect.y += self.direction.y * dt
+		
+		self.rect.y += self.direction.y * dt
 		
 		self.vertical_collisions()
  
