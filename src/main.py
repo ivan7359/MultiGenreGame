@@ -60,7 +60,7 @@ class Game():
     
     def playBgMusic(self):
         self.backgroundMusic = self.assetMngr.getSound('Main_menu')
-        self.backgroundMusic.play(-1)
+        # self.backgroundMusic.play(-1)
 
     def parceJSON(self):
         self.settings = json.load(open("configs/settings.json", 'r'))
@@ -309,7 +309,16 @@ class Game():
                     self.level.update(self.dt)
 
             if (self.currentLevel == LevelEnum.Shooter.value):
-                pass
+                if(self.isLevelInit == False):
+                    self.level = Level()
+                    self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher, self.currentLevel)
+                    self.level.setup_level(self.player, self.currentLevel, "configs/shooter.txt")
+                    #self.loadProgress()
+                    #logging.info(str(savedValues))
+                    self.isLevelInit = True
+
+                if (self.isLevelInit == True):
+                    self.level.update(self.dt)
 
             if (self.currentLevel == LevelEnum.Platformer.value):
                 if(self.isLevelInit == False):
