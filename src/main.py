@@ -60,7 +60,7 @@ class Game():
     
     def playBgMusic(self):
         self.backgroundMusic = self.assetMngr.getSound('Main_menu')
-        self.backgroundMusic.play(-1)
+        # self.backgroundMusic.play(-1)
 
     def parceJSON(self):
         self.settings = json.load(open("configs/settings.json", 'r'))

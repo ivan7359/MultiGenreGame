@@ -13,6 +13,7 @@ class Level:
 	def __init__(self):
 		self.display_surface = pygame.display.get_surface()
 		self.levelMap = []
+		self.mapNumbers = set()
 		
 		# sprite group setup
 		self.visible_sprites = CameraGroup()
@@ -28,7 +29,13 @@ class Level:
 				if not line:
 					break
 				
-				self.levelMap.append(line.split(','))
+				line = line.replace('\n', '').split(',')
+				self.levelMap.append(line)
+				
+				for i in line:
+					self.mapNumbers.add(i)
+
+		print(self.mapNumbers)
 
 	def setup_level(self, player, currentLevel, path):
 		self.player = player
@@ -46,18 +53,17 @@ class Level:
 			self.platformerLoader()
 
 	def strategyLoader(self):
-		# for row_index,row in enumerate(self.matrix):
 		for row_index,row in enumerate(self.levelMap):
 			for col_index,col in enumerate(row):
 				x = col_index * TILE_SIZE
 				y = row_index * TILE_SIZE
-				if col == '866':
+
+				if col in self.mapNumbers:
 					Tile((x,y),[self.visible_sprites, self.collision_sprites])
 				if col == '0':
 					self.player.setPos(x, y)
 
 	def platformerLoader(self):
-		# for row_index,row in enumerate(self.matrix):
 		for row_index,row in enumerate(self.levelMap):
 			for col_index,col in enumerate(row):
 				x = col_index * TILE_SIZE
