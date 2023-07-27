@@ -67,6 +67,20 @@ class Level:
 						self.player.setPos(x, y)
 
 	def strategyLoader(self):
+
+		# for row_index,row in enumerate(self.matrix):
+		for row_index,row in enumerate(self.levelMap):
+			for col_index,col in enumerate(row):
+				x = col_index * TILE_SIZE
+				y = row_index * TILE_SIZE
+				for currWall in range(1, 115):
+					if col == str(currWall):
+					# if col in ['15', '17', '99']:
+						Tile((x,y),[self.visible_sprites, self.collision_sprites])
+					if col == '18324':
+						self.player.setPos(x, y)
+
+	def strategyLoader(self):
 		for row_index,row in enumerate(self.levelMap):
 			for col_index,col in enumerate(row):
 				x = col_index * TILE_SIZE
