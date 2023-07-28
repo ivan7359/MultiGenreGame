@@ -24,8 +24,8 @@ class Game():
 
 # Load all resources
         self.assetMngr = AssetManager('media')
-        # self.assetMngr.loadImages()
-        self.assetMngr.loadSounds()
+        self.assetMngr.loadImages()
+        # self.assetMngr.loadSounds()
         # self.assetMngr.loadFonts()
 
         self.publisher = Subject()
@@ -41,7 +41,7 @@ class Game():
         self.manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
         self.createUIWidgets()
-        threading.Thread(target=self.playBgMusic).start()
+        # threading.Thread(target=self.playBgMusic).start()
 
     def loadProgress(self):
         with open("configs/savefile.txt", "r") as f:
@@ -300,9 +300,9 @@ class Game():
 
             if (self.currentLevel == LevelEnum.Strategy.value):
                 if(self.isLevelInit == False):
-                    self.level = Level()
+                    self.level = Level(self.assetMngr)
                     self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher, self.currentLevel)
-                    self.level.setup_level(self.player, self.currentLevel, "configs/strategy.txt")
+                    self.level.setup_level(self.player, self.currentLevel, "maps/strategy.tmx")
                     self.isLevelInit = True
 
                 if (self.isLevelInit == True):
@@ -310,9 +310,9 @@ class Game():
 
             if (self.currentLevel == LevelEnum.Shooter.value):
                 if(self.isLevelInit == False):
-                    self.level = Level()
+                    self.level = Level(self.assetMngr)
                     self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher, self.currentLevel)
-                    self.level.setup_level(self.player, self.currentLevel, "configs/shooter.txt")
+                    self.level.setup_level(self.player, self.currentLevel, "maps/shooter.txt")
                     #self.loadProgress()
                     #logging.info(str(savedValues))
                     self.isLevelInit = True
@@ -322,9 +322,9 @@ class Game():
 
             if (self.currentLevel == LevelEnum.Platformer.value):
                 if(self.isLevelInit == False):
-                    self.level = Level()
+                    self.level = Level(self.assetMngr)
                     self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher, self.currentLevel)
-                    self.level.setup_level(self.player, self.currentLevel, "configs/levelPlatformer.txt")
+                    self.level.setup_level(self.player, self.currentLevel, "maps/levelPlatformer.txt")
                     self.loadProgress()
                     logging.info(str(savedValues))
                     self.isLevelInit = True

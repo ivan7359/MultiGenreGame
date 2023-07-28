@@ -2,23 +2,61 @@ import pygame
 from config import *
 from player import *
 
+M90 = 1610612736
+P90 = 2684354560
+P180 = M90 * 2
+
 class Tile(pygame.sprite.Sprite):
-	def __init__(self,pos,groups):
+	def __init__(self, assetMngr, pos, groups, img_path):
 		super().__init__(groups)
-		self.image = pygame.Surface((TILE_SIZE,TILE_SIZE))
-		self.image.fill('white')
+		self.assetMngr = assetMngr
+
+		# self.image = pygame.Surface((TILE_SIZE,TILE_SIZE))
+		# self.image.fill('white')
+
+		self.image = self.assetMngr.getImage(img_path)
 		self.rect = self.image.get_rect(topleft = pos)
 		
 class Level:
-	def __init__(self):
+	def __init__(self, assetMngr):
 		self.display_surface = pygame.display.get_surface()
+		self.assetMngr = assetMngr
 		self.levelMap = []
 		self.mapNumbers = set()
+		self.tilesDict = {}
 		
 		# sprite group setup
 		self.visible_sprites = CameraGroup()
 		self.active_sprites = pygame.sprite.Group()
 		self.collision_sprites = pygame.sprite.Group()
+
+	def translitID(self, id):
+		if(len(id) > 3):
+			m90_local = str(int(id) - M90)
+			p180_local = str(int(id) - P180)
+			p90_local = str(int(id) - P90)
+
+			if(len(m90_local) > 0 and len(m90_local) < 4):
+				return m90_local
+			
+			if(len(p180_local) > 0 and len(p180_local) < 4):
+				return p180_local
+		
+			if(len(p90_local) > 0 and len(p90_local) < 4):
+				return p90_local
+			
+			return ''
+
+		else:
+			return id
+
+	def mainParcer(self, path):
+		if path.split('.')[1] == 'txt':
+			logging.info("Loading .txt map")
+			self.parceTXT(path)
+		else:
+			logging.info("Loading .tmx map")
+			self.parceTMX(path)
 
 	def parceTXT(self, path):
 		with open(path, "r") as f:
@@ -37,20 +75,64 @@ class Level:
 
 		print(self.mapNumbers)
 
+	def parceTMX(self, path):
+		with open(path, 'r') as f:
+			while True:
+				line = f.readline()
+
+				if not line:
+					break
+
+# creating [id] = [image's path] dictionary
+				if line.find('<tile ') != -1:
+					id = line[line.find('"') + 1 : line.rfind('"')]		# get ID
+
+					line = f.readline()									# get path of the image
+					line = line[line.find('media') : len(line)]
+					line = line.replace('"/>\n', '')
+					line = line.split('/')[-1].split('.')[0]
+					self.tilesDict[id] = line							# create dict
+
+# creating map from the file
+				line = f.readline()
+
+				if line.find('<data ') != -1:
+					while True:
+						line = f.readline()
+
+						if line.find('</data>') != -1:
+							break
+
+						line = line.replace('\n', '').split(',')
+						
+						for i in range(len(line)):
+							line[i] = self.translitID(line[i])
+							
+							if (len(line[i]) > 0):
+								self.mapNumbers.add(line[i])
+
+						self.levelMap.append(line)
+
+			# for i in self.levelMap:
+			# 	logging.warning(i)
+
+			# for i in self.mapNumbers:
+			# 	print(i)
+
+			# for i in self.tilesDict:
+			# 	print(i + ' = ' + self.tilesDict[i])
+
 	def setup_level(self, player, currentLevel, path):
 		self.player = player
-		self.parceTXT(path)
+		self.mainParcer(path)
 
 		if (currentLevel == LevelEnum.Strategy.value):
-			print("strategyLoader")
 			self.strategyLoader()
 
 		if (currentLevel == LevelEnum.Shooter.value):
-			print("shooterLoader")
 			self.shooterLoader()
 
 		if (currentLevel == LevelEnum.Platformer.value):
-			print("platformerLoader")
 			self.platformerLoader()
 
 	def shooterLoader(self):
@@ -62,21 +144,7 @@ class Level:
 				for currWall in range(1, 115):
 					if col == str(currWall):
 					# if col in ['15', '17', '99']:
-						Tile((x,y),[self.visible_sprites, self.collision_sprites])
-					if col == '18324':
-						self.player.setPos(x, y)
-
-	def strategyLoader(self):
-
-		# for row_index,row in enumerate(self.matrix):
-		for row_index,row in enumerate(self.levelMap):
-			for col_index,col in enumerate(row):
-				x = col_index * TILE_SIZE
-				y = row_index * TILE_SIZE
-				for currWall in range(1, 115):
-					if col == str(currWall):
-					# if col in ['15', '17', '99']:
-						Tile((x,y),[self.visible_sprites, self.collision_sprites])
+						Tile(self.assetMngr, (x,y),[self.visible_sprites, self.collision_sprites])
 					if col == '18324':
 						self.player.setPos(x, y)
 
@@ -87,7 +155,7 @@ class Level:
 				y = row_index * TILE_SIZE
 
 				if col in self.mapNumbers:
-					Tile((x,y),[self.visible_sprites, self.collision_sprites])
+					Tile(self.assetMngr, (x,y),[self.visible_sprites, self.collision_sprites], self.tilesDict[col])
 				if col == '0':
 					self.player.setPos(x, y)
 
@@ -97,7 +165,7 @@ class Level:
 				x = col_index * TILE_SIZE
 				y = row_index * TILE_SIZE
 				if col == "1":
-					Tile((x,y),[self.visible_sprites, self.collision_sprites])
+					Tile(self.assetMngr, (x,y),[self.visible_sprites, self.collision_sprites])
 				if col == '7':
 					self.player.setPos(x, y)
 				if col == "C":
@@ -158,4 +226,39 @@ class CameraGroup(pygame.sprite.Group):
 			self.display_surface.blit(sprite.image, offset_pos)
 
 
+'''
+id = 862
+863										|	(0)
+863 + 1610612736 		= 1610613599	|	(-90)
+863 + 2684354560        = 2684355423	|	(90)
+863 + (1610612736 * 2)	= 3221226335	|	(180)
+'''
 
+'''
+id = 851
+
+852 	 								|	(0)
+852 + 1610612736 = 1610613588			|	(-90)
+852 + 2684354560 = 2684355412			|	(90)
+852 + (1610612736 * 2) = 3221226324		|	(180)
+'''
+
+'''
+
+1073742385
+
+
+
+'''
+
+'''
+
+EXCEPTIONS
+----------
+
+2147484497
+536871222
+1073742388
+1073742385
+
+'''
