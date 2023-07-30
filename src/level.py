@@ -7,14 +7,15 @@ P90 = 2684354560
 P180 = M90 * 2
 
 class Tile(pygame.sprite.Sprite):
-	def __init__(self, assetMngr, pos, groups, img_path):
+	def __init__(self, assetMngr, pos, groups, img_path, rotation):
 		super().__init__(groups)
 		self.assetMngr = assetMngr
 
-		# self.image = pygame.Surface((TILE_SIZE,TILE_SIZE))
+		# self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
 		# self.image.fill('white')
 
 		self.image = self.assetMngr.getImage(img_path)
+		self.image = pygame.transform.rotate(self.image, rotation)
 		self.rect = self.image.get_rect(topleft = pos)
 		
 class Level:
@@ -30,25 +31,27 @@ class Level:
 		self.active_sprites = pygame.sprite.Group()
 		self.collision_sprites = pygame.sprite.Group()
 
+		self.spritesGroup = [self.visible_sprites, self.collision_sprites]
+
 	def translitID(self, id):
 		if(len(id) > 3):
-			m90_local = str(int(id) - M90)
-			p180_local = str(int(id) - P180)
-			p90_local = str(int(id) - P90)
+			m90_local = str(int(id) - M90 - 1)
+			p180_local = str(int(id) - P180 - 1)
+			p90_local = str(int(id) - P90 - 1)
 
 			if(len(m90_local) > 0 and len(m90_local) < 4):
-				return m90_local
+				return [m90_local, 90]
 			
 			if(len(p180_local) > 0 and len(p180_local) < 4):
-				return p180_local
+				return [p180_local, 180]
 		
 			if(len(p90_local) > 0 and len(p90_local) < 4):
-				return p90_local
+				return [p90_local, -90]
 			
-			return ''
+			return ['', 0]
 
 		else:
-			return id
+			return [id, 0]
 
 	def mainParcer(self, path):
 		if path.split('.')[1] == 'txt':
@@ -104,23 +107,26 @@ class Level:
 							break
 
 						line = line.replace('\n', '').split(',')
-						
+
+						tmp = []
+
 						for i in range(len(line)):
-							line[i] = self.translitID(line[i])
+							matrix = []
+
+							mod_line = self.translitID(line[i])
+							line[i] = mod_line[0]
+							rotation = mod_line[1]
 							
 							if (len(line[i]) > 0):
 								self.mapNumbers.add(line[i])
 
-						self.levelMap.append(line)
+							matrix.append(line[i])
+							matrix.append(rotation)
 
-			# for i in self.levelMap:
-			# 	logging.warning(i)
+							tmp.append(matrix)
+							print(matrix)
 
-			# for i in self.mapNumbers:
-			# 	print(i)
-
-			# for i in self.tilesDict:
-			# 	print(i + ' = ' + self.tilesDict[i])
+						self.levelMap.append(tmp)
 
 	def setup_level(self, player, currentLevel, path):
 		self.player = player
@@ -144,19 +150,19 @@ class Level:
 				for currWall in range(1, 115):
 					if col == str(currWall):
 					# if col in ['15', '17', '99']:
-						Tile(self.assetMngr, (x,y),[self.visible_sprites, self.collision_sprites])
+						Tile(self.assetMngr, (x,y),self.spritesGroup)
 					if col == '18324':
 						self.player.setPos(x, y)
 
 	def strategyLoader(self):
-		for row_index,row in enumerate(self.levelMap):
-			for col_index,col in enumerate(row):
+		for row_index, row in enumerate(self.levelMap):
+			for col_index, col in enumerate(row):
 				x = col_index * TILE_SIZE
 				y = row_index * TILE_SIZE
 
-				if col in self.mapNumbers:
-					Tile(self.assetMngr, (x,y),[self.visible_sprites, self.collision_sprites], self.tilesDict[col])
-				if col == '0':
+				if col[0] in self.mapNumbers:
+					Tile(self.assetMngr, (x,y), self.spritesGroup, self.tilesDict[col[0]], col[1])
+				if col[0] == '0':
 					self.player.setPos(x, y)
 
 	def platformerLoader(self):
@@ -165,7 +171,7 @@ class Level:
 				x = col_index * TILE_SIZE
 				y = row_index * TILE_SIZE
 				if col == "1":
-					Tile(self.assetMngr, (x,y),[self.visible_sprites, self.collision_sprites])
+					Tile(self.assetMngr, (x,y),self.spritesGroup)
 				if col == '7':
 					self.player.setPos(x, y)
 				if col == "C":
