@@ -7,10 +7,14 @@ P90 = 2684354560
 P180 = M90 * 2
 
 class Parser:
-	def __init__(self, levelMap, mapNumbers, tilesDict):
+	def __init__(self, levelMap, mapNumbers, tilesDict, imgDict, castles, castlesNumbers):
 		self.levelMap = levelMap
 		self.mapNumbers = mapNumbers
 		self.tilesDict = tilesDict
+
+		self.castles = castles
+		self.castlesNumbers = castlesNumbers
+		self.imgDict = imgDict
 
 	def __translitID(self, id):
 		if(len(id) > 3):
@@ -32,47 +36,97 @@ class Parser:
 		else:
 			return [id, 0]
 
-	def __getAllIDs(self, f, line):
-		if line.find('<tile ') != -1:
-			id = line[line.find('"') + 1 : line.rfind('"')]		# get ID
-
-			line = f.readline()									# get path of the image
-			line = line[line.find('media') : len(line)]
-			line = line.replace('"/>\n', '')
-			line = line.split('/')[-1].split('.')[0]
-			self.tilesDict[id] = line							# create dict
-
-	def __loadMap(self, f, line):
-		line = f.readline()
-
-		if line.find('<data ') != -1:
+	def __getAllIDs(self, path):
+		with open(path, 'r') as f:
 			while True:
 				line = f.readline()
 
-				if line.find('</data>') != -1:
+				if not line:
+					break
+		
+				if line.find('<tile ') != -1:
+					id = line[line.find('"') + 1 : line.rfind('"')]		# get ID
+
+					line = f.readline()									# get path of the image
+					line = line[line.find('media') : len(line)]
+					line = line.replace('"/>\n', '')
+					line = line.split('/')[-1].split('.')[0]
+					self.tilesDict[id] = line							# create dict
+
+	def __getAllImages(self, path):
+		with open(path, 'r') as f:
+			while True:
+				line = f.readline()
+
+				if not line:
 					break
 
-				line = line.replace('\n', '').split(',')
-
-				tmp = []
-
-				for i in range(len(line)):
-					matrix = []
-
-					mod_line = self.__translitID(line[i])
-					line[i] = mod_line[0]
-					rotation = mod_line[1]
+				if line.find('<tileset ') != -1:
+					id = line[line.find('firstgid=') : line.find(' name=')].split('"')[1]
 					
-					if (len(line[i]) > 0):
-						self.mapNumbers.add(line[i])
+					if(id != 1):
+						self.castlesNumbers.add(id)
 
-					matrix.append(line[i])
-					matrix.append(rotation)
+						line = f.readline()
+						if(line.find('<image ') != -1):
+							line = line[line.find('source=') : line.find('width=')].split('"')[1]
+							line = line.split('/')[-1].split('.')[0]
 
-					tmp.append(matrix)
-					print(matrix)
+							self.imgDict[id] = line
 
-				self.levelMap.append(tmp)
+	def __loadMap(self, path, level_layer, numbers, desirable_layer):
+		for i in self.castlesNumbers:
+			logging.warn(i)
+
+		with open(path, 'r') as f:
+			while True:
+				line = f.readline()
+
+				if not line:
+					break
+
+				if line.find('<layer ') != -1:
+					layer = int(line.split(' ')[2].split('"')[1])
+					
+					if(layer == desirable_layer):
+						line = f.readline()
+
+						while True:
+							line = f.readline()
+
+							if line.find('</data>') != -1:
+								break
+
+							line = line.replace('\n', '').split(',')
+							tmp = []
+
+							for i in range(len(line)):
+								matrix = []
+
+								mod_line = self.__translitID(line[i])
+								line[i] = mod_line[0]
+								rotation = mod_line[1]
+								
+								if (len(line[i]) > 0):
+									numbers.add(line[i])
+
+								if(layer == 1):
+									matrix.append(line[i])
+
+								if(layer == 3):
+									if(line[i] in self.imgDict.keys()):
+										matrix.append(line[i])
+									else:
+										matrix.append('0')
+								
+								matrix.append(rotation)
+								tmp.append(matrix)
+
+							level_layer.append(tmp)
+						break
+
+		for i in level_layer:
+			logging.critical(i)
 
 	def mainParcer(self, path):
 		if path.split('.')[1] == 'txt':
@@ -100,18 +154,13 @@ class Parser:
 		print(self.mapNumbers)
 
 	def parceTMX(self, path):
-		with open(path, 'r') as f:
-			while True:
-				line = f.readline()
+		# creating [id] = [image's path] dictionary
+		self.__getAllIDs(path)
+		self.__getAllImages(path)
 
-				if not line:
-					break
-
-# creating [id] = [image's path] dictionary
-				self.__getAllIDs(f, line)
-
-# creating map from the file
-				self.__loadMap(f, line)
+		# creating map from the file
+		self.__loadMap(path, self.levelMap, self.mapNumbers, 1)
+		self.__loadMap(path, self.castles, self.castlesNumbers, 3)
 
 class Tile(pygame.sprite.Sprite):
 	def __init__(self, assetMngr, pos, groups, img_path, rotation):
@@ -129,11 +178,16 @@ class Level:
 	def __init__(self, assetMngr):
 		self.display_surface = pygame.display.get_surface()
 		self.assetMngr = assetMngr
+
 		self.levelMap = []
 		self.mapNumbers = set()
 		self.tilesDict = {}
 
-		self.parser = Parser(self.levelMap, self.mapNumbers, self.tilesDict)
+		self.castles = []
+		self.castlesNumbers = set()
+		self.imgDict = {}
+
+		self.parser = Parser(self.levelMap, self.mapNumbers, self.tilesDict, self.imgDict, self.castles, self.castlesNumbers)
 
 		# sprite group setup
 		self.visible_sprites = CameraGroup()
@@ -147,7 +201,8 @@ class Level:
 		self.parser.mainParcer(path)
 
 		if (currentLevel == LevelEnum.Strategy.value):
-			self.strategyLoader()
+			self.strategyLoader(self.levelMap, self.mapNumbers, self.tilesDict)
+			self.strategyLoader(self.castles, self.castlesNumbers, self.imgDict)
 
 		if (currentLevel == LevelEnum.Shooter.value):
 			self.shooterLoader()
@@ -168,15 +223,15 @@ class Level:
 					if col == '18324':
 						self.player.setPos(x, y)
 
-	def strategyLoader(self):
-		for row_index, row in enumerate(self.levelMap):
+	def strategyLoader(self, level_layer, numbers, dict):
+		for row_index, row in enumerate(level_layer):
 			for col_index, col in enumerate(row):
 				x = col_index * TILE_SIZE
 				y = row_index * TILE_SIZE
 
-				if col[0] in self.mapNumbers:
-					Tile(self.assetMngr, (x,y), self.spritesGroup, self.tilesDict[col[0]], col[1])
-				if col[0] == '0':
+				if col[0] in numbers and col[0] != '0':
+					Tile(self.assetMngr, (x,y), self.spritesGroup, dict[col[0]], col[1])
+				if col[0] == '18324':
 					self.player.setPos(x, y)
 
 	def platformerLoader(self):
