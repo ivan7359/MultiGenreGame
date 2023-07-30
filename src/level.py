@@ -6,34 +6,13 @@ M90 = 1610612736
 P90 = 2684354560
 P180 = M90 * 2
 
-class Tile(pygame.sprite.Sprite):
-	def __init__(self, assetMngr, pos, groups, img_path, rotation):
-		super().__init__(groups)
-		self.assetMngr = assetMngr
+class Parser:
+	def __init__(self, levelMap, mapNumbers, tilesDict):
+		self.levelMap = levelMap
+		self.mapNumbers = mapNumbers
+		self.tilesDict = tilesDict
 
-		# self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
-		# self.image.fill('white')
-
-		self.image = self.assetMngr.getImage(img_path)
-		self.image = pygame.transform.rotate(self.image, rotation)
-		self.rect = self.image.get_rect(topleft = pos)
-		
-class Level:
-	def __init__(self, assetMngr):
-		self.display_surface = pygame.display.get_surface()
-		self.assetMngr = assetMngr
-		self.levelMap = []
-		self.mapNumbers = set()
-		self.tilesDict = {}
-		
-		# sprite group setup
-		self.visible_sprites = CameraGroup()
-		self.active_sprites = pygame.sprite.Group()
-		self.collision_sprites = pygame.sprite.Group()
-
-		self.spritesGroup = [self.visible_sprites, self.collision_sprites]
-
-	def translitID(self, id):
+	def __translitID(self, id):
 		if(len(id) > 3):
 			m90_local = str(int(id) - M90 - 1)
 			p180_local = str(int(id) - P180 - 1)
@@ -52,6 +31,48 @@ class Level:
 
 		else:
 			return [id, 0]
+
+	def __getAllIDs(self, f, line):
+		if line.find('<tile ') != -1:
+			id = line[line.find('"') + 1 : line.rfind('"')]		# get ID
+
+			line = f.readline()									# get path of the image
+			line = line[line.find('media') : len(line)]
+			line = line.replace('"/>\n', '')
+			line = line.split('/')[-1].split('.')[0]
+			self.tilesDict[id] = line							# create dict
+
+	def __loadMap(self, f, line):
+		line = f.readline()
+
+		if line.find('<data ') != -1:
+			while True:
+				line = f.readline()
+
+				if line.find('</data>') != -1:
+					break
+
+				line = line.replace('\n', '').split(',')
+
+				tmp = []
+
+				for i in range(len(line)):
+					matrix = []
+
+					mod_line = self.__translitID(line[i])
+					line[i] = mod_line[0]
+					rotation = mod_line[1]
+					
+					if (len(line[i]) > 0):
+						self.mapNumbers.add(line[i])
+
+					matrix.append(line[i])
+					matrix.append(rotation)
+
+					tmp.append(matrix)
+					print(matrix)
+
+				self.levelMap.append(tmp)
 
 	def mainParcer(self, path):
 		if path.split('.')[1] == 'txt':
@@ -87,50 +108,43 @@ class Level:
 					break
 
 # creating [id] = [image's path] dictionary
-				if line.find('<tile ') != -1:
-					id = line[line.find('"') + 1 : line.rfind('"')]		# get ID
-
-					line = f.readline()									# get path of the image
-					line = line[line.find('media') : len(line)]
-					line = line.replace('"/>\n', '')
-					line = line.split('/')[-1].split('.')[0]
-					self.tilesDict[id] = line							# create dict
+				self.__getAllIDs(f, line)
 
 # creating map from the file
-				line = f.readline()
+				self.__loadMap(f, line)
 
-				if line.find('<data ') != -1:
-					while True:
-						line = f.readline()
+class Tile(pygame.sprite.Sprite):
+	def __init__(self, assetMngr, pos, groups, img_path, rotation):
+		super().__init__(groups)
+		self.assetMngr = assetMngr
 
-						if line.find('</data>') != -1:
-							break
+		# self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
+		# self.image.fill('white')
 
-						line = line.replace('\n', '').split(',')
+		self.image = self.assetMngr.getImage(img_path)
+		self.image = pygame.transform.rotate(self.image, rotation)
+		self.rect = self.image.get_rect(topleft = pos)
+		
+class Level:
+	def __init__(self, assetMngr):
+		self.display_surface = pygame.display.get_surface()
+		self.assetMngr = assetMngr
+		self.levelMap = []
+		self.mapNumbers = set()
+		self.tilesDict = {}
 
-						tmp = []
+		self.parser = Parser(self.levelMap, self.mapNumbers, self.tilesDict)
 
-						for i in range(len(line)):
-							matrix = []
+		# sprite group setup
+		self.visible_sprites = CameraGroup()
+		self.active_sprites = pygame.sprite.Group()
+		self.collision_sprites = pygame.sprite.Group()
 
-							mod_line = self.translitID(line[i])
-							line[i] = mod_line[0]
-							rotation = mod_line[1]
-							
-							if (len(line[i]) > 0):
-								self.mapNumbers.add(line[i])
-
-							matrix.append(line[i])
-							matrix.append(rotation)
-
-							tmp.append(matrix)
-							print(matrix)
-
-						self.levelMap.append(tmp)
+		self.spritesGroup = [self.visible_sprites, self.collision_sprites]
 
 	def setup_level(self, player, currentLevel, path):
 		self.player = player
-		self.mainParcer(path)
+		self.parser.mainParcer(path)
 
 		if (currentLevel == LevelEnum.Strategy.value):
 			self.strategyLoader()
@@ -231,40 +245,3 @@ class CameraGroup(pygame.sprite.Group):
 			offset_pos = sprite.rect.topleft - self.offset
 			self.display_surface.blit(sprite.image, offset_pos)
 
-
-'''
-id = 862
-863										|	(0)
-863 + 1610612736 		= 1610613599	|	(-90)
-863 + 2684354560        = 2684355423	|	(90)
-863 + (1610612736 * 2)	= 3221226335	|	(180)
-'''
-
-'''
-id = 851
-
-852 	 								|	(0)
-852 + 1610612736 = 1610613588			|	(-90)
-852 + 2684354560 = 2684355412			|	(90)
-852 + (1610612736 * 2) = 3221226324		|	(180)
-'''
-
-'''
-
-1073742385
-
-
-
-'''
-
-'''
-
-EXCEPTIONS
-----------
-
-2147484497
-536871222
-1073742388
-1073742385
-
-'''
