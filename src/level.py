@@ -8,19 +8,13 @@ P180 = M90 * 2
 
 ID_OFFSET = 986
 
-class Parser:
-	def __init__(self, levelMap, mapNumbers, tilesDict, imgDict, castles, castlesNumbers,  landscape, landscapeNumbers, landscapeDict):
-		self.levelMap = levelMap
-		self.mapNumbers = mapNumbers
-		self.tilesDict = tilesDict
+class Layer:
+	def __init__(self, path):
+		self.path = path
 
-		self.castles = castles
-		self.castlesNumbers = castlesNumbers
-		self.imgDict = imgDict
-
-		self.landscape = landscape
-		self.landscapeNumbers = landscapeNumbers
-		self.landscapeDict = landscapeDict
+		self.map = []
+		self.numbers = set()
+		self.tilesDict = {}
 
 	def __translitID(self, id):
 		if(len(id) > 4):
@@ -42,93 +36,8 @@ class Parser:
 		else:
 			return [id, 0]
 
-	def __getAllIDs(self, path):
-		with open(path, 'r') as f:
-			while True:
-				line = f.readline()
-
-				if not line:
-					break
-		
-				if line.find('<tileset ') != -1:
-					if (line.find('firstgid=') != -1):
-						id = line[line.find('firstgid=') : line.find(' name=')].split('"')[1]
-						
-						if(id == "1"):
-							while True:
-								line = f.readline()
-								line = f.readline()
-
-								if line.find("</tileset>") != -1:
-									break
-
-								id = str(int(line[line.find('"') + 1 : line.rfind('"')]))	# get ID
-								print(id)
-
-								line = f.readline()									# get path of the image
-								line = line[line.find('media') : len(line)]
-								line = line.replace('"/>\n', '')
-								line = line.split('/')[-1].split('.')[0]
-								self.tilesDict[id] = line							# create dict
-
-							break
-							
-
-	
-	def __getAllIDs_landscape(self, path):
-		with open(path, 'r') as f:
-			while True:
-				line = f.readline()
-
-				if not line:
-					break
-		
-				if line.find('<tileset ') != -1:
-					if line.find('name="Landscape"') != -1:
-						while True:
-							line = f.readline()
-							line = f.readline()
-
-							if line.find("</tileset>") != -1:
-								break
-
-							id = str(int(line[line.find('"') + 1 : line.rfind('"')]) + ID_OFFSET)	# get ID
-
-							line = f.readline()									# get path of the image
-							line = line[line.find('..') : len(line)]
-							line = line.replace('"/>\n', '')
-							line = line.split('/')[-1].split('.')[0]
-							
-							self.landscapeDict[id] = line
-						break
-
-		# for i in self.landscapeDict:
-		# 	print(i + " " + self.landscapeDict[i])
-
-	def __getAllImages(self, path):
-		with open(path, 'r') as f:
-			while True:
-				line = f.readline()
-
-				if not line:
-					break
-
-				if line.find('<tileset ') != -1:
-					if (line.find('firstgid=') != -1):
-						id = line[line.find('firstgid=') : line.find(' name=')].split('"')[1]
-						
-						if(id != 1):
-							self.castlesNumbers.add(id)
-
-							line = f.readline()
-							if(line.find('<image ') != -1):
-								line = line[line.find('source=') : line.find('width=')].split('"')[1]
-								line = line.split('/')[-1].split('.')[0]
-
-								self.imgDict[id] = line
-
-	def __loadMap(self, path, level_layer, numbers, desirable_layer, _dict):
-		with open(path, 'r') as f:
+	def loadlayer(self, desirable_layer):
+		with open(self.path, 'r') as f:
 			while True:
 				line = f.readline()
 
@@ -158,13 +67,13 @@ class Parser:
 								rotation = mod_line[1]
 								
 								if (len(line[i]) > 0):
-									numbers.add(line[i])
+									self.numbers.add(line[i])
 
 								if(layer == 1):
 									matrix.append(line[i])
 
 								if(layer == 3 or layer == 4):
-									if(line[i] in _dict.keys()):
+									if(line[i] in self.tilesDict.keys()):
 										matrix.append(line[i])
 									else:
 										matrix.append('0')
@@ -172,13 +81,108 @@ class Parser:
 								matrix.append(rotation)
 								tmp.append(matrix)
 
-							level_layer.append(tmp)
+							self.map.append(tmp)
 						break
 
-		# for i in level_layer:
-		# 	logging.critical(i)
+			# for i in level_layer:
+			# 	logging.critical(i)
 
-		# logging.info(' ')
+			# logging.info(' ')
+
+class Parser:
+	def __init__(self, terrain, castles, landscape):
+		self.terrainLayer = terrain
+		self.castlesLayer = castles
+		self.landscapeLayer = landscape
+
+	def __getTerrainIDs(self, path):
+		with open(path, 'r') as f:
+			while True:
+				line = f.readline()
+
+				if not line:
+					break
+		
+				if line.find('<tileset ') != -1:
+					if (line.find('firstgid=') != -1):
+						id = line[line.find('firstgid=') : line.find(' name=')].split('"')[1]
+						
+						if(id == "1"):
+							while True:
+								line = f.readline()
+								line = f.readline()
+
+								if line.find("</tileset>") != -1:
+									break
+
+								id = str(int(line[line.find('"') + 1 : line.rfind('"')]))	# get ID
+								print(id)
+
+								line = f.readline()									# get path of the image
+								line = line[line.find('media') : len(line)]
+								line = line.replace('"/>\n', '')
+								line = line.split('/')[-1].split('.')[0]
+								self.terrainLayer.tilesDict[id] = line							# create dict
+
+							break
+
+		# for i in self.terrainLayer.tilesDict:
+			# logging.info(i + " " + self.terrainLayer.tilesDict[i])
+		
+	def __getCastlesIDs(self, path):
+		with open(path, 'r') as f:
+			while True:
+				line = f.readline()
+
+				if not line:
+					break
+
+				if line.find('<tileset ') != -1:
+					if (line.find('firstgid=') != -1):
+						id = line[line.find('firstgid=') : line.find(' name=')].split('"')[1]
+						
+						if(id != 1):
+							self.castlesLayer.numbers.add(id)
+
+							line = f.readline()
+							if(line.find('<image ') != -1):
+								line = line[line.find('source=') : line.find('width=')].split('"')[1]
+								line = line.split('/')[-1].split('.')[0]
+
+								self.castlesLayer.tilesDict[id] = line
+		
+		# for i in self.castlesLayer.tilesDict:
+		# 	logging.info(i + " " + self.castlesLayer.tilesDict[i])
+
+	def __getLandscapeIDs(self, path):
+		with open(path, 'r') as f:
+			while True:
+				line = f.readline()
+
+				if not line:
+					break
+		
+				if line.find('<tileset ') != -1:
+					if line.find('name="Landscape"') != -1:
+						while True:
+							line = f.readline()
+							line = f.readline()
+
+							if line.find("</tileset>") != -1:
+								break
+
+							id = str(int(line[line.find('"') + 1 : line.rfind('"')]) + ID_OFFSET)	# get ID
+
+							line = f.readline()									# get path of the image
+							line = line[line.find('..') : len(line)]
+							line = line.replace('"/>\n', '')
+							line = line.split('/')[-1].split('.')[0]
+							
+							self.landscapeLayer.tilesDict[id] = line
+						break
+
+		# for i in self.landscapeLayer.tilesDict:
+		# 	logging.info(i + " " + self.landscapeLayer.tilesDict[i])
 
 	def mainParcer(self, path):
 		if path.split('.')[1] == 'txt':
@@ -207,14 +211,14 @@ class Parser:
 
 	def parceTMX(self, path):
 		# creating [id] = [image's path] dictionary
-		self.__getAllIDs(path)
-		self.__getAllImages(path)
-		self.__getAllIDs_landscape(path)
+		self.__getTerrainIDs(path)
+		self.__getCastlesIDs(path)
+		self.__getLandscapeIDs(path)
 
 		# creating map from the file
-		self.__loadMap(path, self.levelMap, self.mapNumbers, 1, self.tilesDict)
-		self.__loadMap(path, self.castles, self.castlesNumbers, 3, self.imgDict)
-		self.__loadMap(path, self.landscape, self.landscapeNumbers, 4, self.landscapeDict)
+		self.terrainLayer.loadlayer(1)
+		self.castlesLayer.loadlayer(3)
+		self.landscapeLayer.loadlayer(4)
 
 class Tile(pygame.sprite.Sprite):
 	def __init__(self, assetMngr, pos, groups, img_path, rotation):
@@ -233,20 +237,6 @@ class Level:
 		self.display_surface = pygame.display.get_surface()
 		self.assetMngr = assetMngr
 
-		self.levelMap = []
-		self.mapNumbers = set()
-		self.tilesDict = {}
-
-		self.castles = []
-		self.castlesNumbers = set()
-		self.imgDict = {}
-
-		self.landscape = []
-		self.landscapeNumbers = set()
-		self.landscapeDict = {}
-
-		self.parser = Parser(self.levelMap, self.mapNumbers, self.tilesDict, self.imgDict, self.castles, self.castlesNumbers, self.landscape, self.landscapeNumbers, self.landscapeDict)
-
 		# sprite group setup
 		self.visible_sprites = CameraGroup()
 		self.active_sprites = pygame.sprite.Group()
@@ -256,12 +246,18 @@ class Level:
 
 	def setup_level(self, player, currentLevel, path):
 		self.player = player
+
+		self.terrainLayer = Layer(path)
+		self.castlesLayer = Layer(path)
+		self.landscapeLayer = Layer(path)
+
+		self.parser = Parser(self.terrainLayer, self.castlesLayer, self.landscapeLayer)
 		self.parser.mainParcer(path)
 
 		if (currentLevel == LevelEnum.Strategy.value):
-			self.strategyLoader(self.levelMap, self.mapNumbers, self.tilesDict)
-			self.strategyLoader(self.castles, self.castlesNumbers, self.imgDict)
-			self.strategyLoader(self.landscape, self.landscapeNumbers, self.landscapeDict)
+			self.strategyLoader(self.terrainLayer)
+			self.strategyLoader(self.castlesLayer)
+			self.strategyLoader(self.landscapeLayer)
 
 		if (currentLevel == LevelEnum.Shooter.value):
 			self.shooterLoader()
@@ -282,14 +278,14 @@ class Level:
 					if col == '18324':
 						self.player.setPos(x, y)
 
-	def strategyLoader(self, level_layer, numbers, dict):
-		for row_index, row in enumerate(level_layer):
+	def strategyLoader(self, layer):
+		for row_index, row in enumerate(layer.map):
 			for col_index, col in enumerate(row):
 				x = col_index * TILE_SIZE
 				y = row_index * TILE_SIZE
 
-				if col[0] in numbers and col[0] != '0':
-					Tile(self.assetMngr, (x,y), self.spritesGroup, dict[col[0]], col[1])
+				if col[0] in layer.numbers and col[0] != '0':
+					Tile(self.assetMngr, (x,y), self.spritesGroup, layer.tilesDict[col[0]], col[1])
 				if col[0] == '18324':
 					self.player.setPos(x, y)
 
