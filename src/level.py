@@ -85,9 +85,9 @@ class Layer:
 						break
 
 			# for i in level_layer:
-			# 	logging.critical(i)
+			# 	CriticalLogger.critical(i)
 
-			# logging.info(' ')
+			# InfoLogger.info(' ')
 
 class Parser:
 	def __init__(self, terrain, castles, landscape):
@@ -127,7 +127,7 @@ class Parser:
 							break
 
 		# for i in self.terrainLayer.tilesDict:
-			# logging.info(i + " " + self.terrainLayer.tilesDict[i])
+			# InfoLogger.info(i + " " + self.terrainLayer.tilesDict[i])
 		
 	def __getCastlesIDs(self, path):
 		with open(path, 'r') as f:
@@ -152,7 +152,7 @@ class Parser:
 								self.castlesLayer.tilesDict[id] = line
 		
 		# for i in self.castlesLayer.tilesDict:
-		# 	logging.info(i + " " + self.castlesLayer.tilesDict[i])
+		# 	InfoLogger.info(i + " " + self.castlesLayer.tilesDict[i])
 
 	def __getLandscapeIDs(self, path):
 		with open(path, 'r') as f:
@@ -182,14 +182,14 @@ class Parser:
 						break
 
 		# for i in self.landscapeLayer.tilesDict:
-		# 	logging.info(i + " " + self.landscapeLayer.tilesDict[i])
+		# 	InfoLogger.info(i + " " + self.landscapeLayer.tilesDict[i])
 
 	def mainParcer(self, path):
 		if path.split('.')[1] == 'txt':
-			logging.info("Loading .txt map")
+			InfoLogger.info("Loading .txt map")
 			self.parceTXT(path)
 		else:
-			logging.info("Loading .tmx map")
+			InfoLogger.info("Loading .tmx map")
 			self.parceTMX(path)
 
 	def parceTXT(self, path):

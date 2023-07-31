@@ -22,7 +22,24 @@ prev_state = state
 
 savedValues = {}
 
-logging.basicConfig(level= logging.DEBUG, filename= "logs/logs.log", filemode= "w")
+def setup_logger(name, log_file, level=logging.INFO):
+    """To setup as many loggers as you want"""
+    formatter = logging.Formatter('%(levelname)s %(message)s')
+    handler = logging.FileHandler(log_file, mode='w')
+    handler.setFormatter(formatter)
+
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(handler)
+
+    return logger
+
+DebugLogger = setup_logger('DEBUG', 'logs/DebugLogs.log', logging.DEBUG)
+InfoLogger = setup_logger('INFO', 'logs/InfoLogs.log', logging.INFO)
+WarningLogger = setup_logger('WARNING', 'logs/WarningLogs.log', logging.WARNING)
+CriticalLogger = setup_logger('CRITICAL', 'logs/CriticalLogs.log', logging.CRITICAL)
+
+# logging.basicConfig(level= logging.DEBUG, filename= "logs/logs.log", filemode= "w")
 
 TILE_SIZE = 32
 WIDTH, HEIGHT = 1280, 720
