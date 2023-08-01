@@ -17,6 +17,13 @@ class LevelEnum(enum.Enum):
     Shooter = 1
     Platformer = 2
 
+class TileEnum(enum.Enum):
+    _None = 0
+    Door = 1
+    Chest = 2
+    Coin = 3
+    Portal = 4
+
 state = UIEnum.Main_menu.value
 prev_state = state
 

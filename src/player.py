@@ -2,8 +2,10 @@ import pygame
 from config import *
 
 class Player(pygame.sprite.Sprite):
-	def __init__(self, groups, collision_sprites, publisher, state):
-		super().__init__(groups)
+	def __init__(self, objSprites, publisher, state):
+		# super().__init__(groups)
+		self.display_surface = pygame.display.get_surface()
+		self.objSprites = objSprites
 		self.publisher = publisher
 		self.state = state
 		self.image = pygame.Surface((TILE_SIZE // 2,TILE_SIZE))
@@ -15,7 +17,6 @@ class Player(pygame.sprite.Sprite):
 		self.speed = 12
 		self.gravity = 0.8
 		self.jump_speed = 16
-		self.collision_sprites = collision_sprites
 		self.on_floor = False
 		self.countJump = 2
 		self.isMoving = [False, False]
@@ -90,4 +91,6 @@ class Player(pygame.sprite.Sprite):
 		if(self.state == LevelEnum.Strategy.value):
 			if(self.isMoving[1] == True):
 				self.rect.y += self.direction.y * self.speed * dt
-		
+
+	def draw(self):
+		self.display_surface.blit(self.image, self.rect.topleft)

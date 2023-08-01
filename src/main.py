@@ -300,8 +300,11 @@ class Game():
 
             if (self.currentLevel == LevelEnum.Strategy.value):
                 if(self.isLevelInit == False):
+                    
                     self.level = Level(self.assetMngr)
-                    self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher, self.currentLevel)
+                    # self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher, self.currentLevel)
+                    self.player = Player(self.level.objPool, self.publisher, self.currentLevel)
+                    # self.player = None
                     self.level.setup_level(self.player, self.currentLevel, "maps/strategy.tmx")
                     self.isLevelInit = True
 
