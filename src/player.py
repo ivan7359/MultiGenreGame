@@ -78,7 +78,7 @@ class Player(pygame.sprite.Sprite):
 				self.publisher.notify(EventsEnum.movement.value)
 	
 			self.rect.x += self.direction.x * self.speed * dt
-			self.horizontal_collisions()
+			# self.horizontal_collisions()
 		
 		if(self.state == LevelEnum.Platformer.value):
 			if(self.on_floor == False):

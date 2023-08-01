@@ -29,7 +29,7 @@ class AssetManager():
             self.__scanFolder(self.path, ['.mp3', '.MP3'])
 
     def loadSounds(self):
-        logging.info("LOADING SOUNDS")
+        InfoLogger.info("LOADING SOUNDS")
         self.__loadResources('sounds')
 
         for file in self.__result:
@@ -41,11 +41,12 @@ class AssetManager():
 
         self.__result.clear()
 
+        DebugLogger.debug("------ SOUNDS ------")
         for i in self.__sounds:
-            logging.debug(i + ' = ' + str(self.__sounds[i]))
+            DebugLogger.debug(i + ' = ' + str(self.__sounds[i]))
 
     def loadImages(self):
-        logging.info("LOADING IMAGES")
+        InfoLogger.info("LOADING IMAGES")
         self.__loadResources('images')
         
         for file in self.__result:
@@ -55,18 +56,20 @@ class AssetManager():
 
         self.__result.clear()
 
+        DebugLogger.debug("------ IMAGES ------")
         for i in self.__imgs:
-            logging.debug(i + ' = ' + str(self.__imgs[i]))
+            DebugLogger.debug(i + ' = ' + str(self.__imgs[i]))
 
     def loadFonts(self):
-        logging.info("LOADING FONTS")
+        InfoLogger.info("LOADING FONTS")
 
         self.__fonts['UI'] = pygame.freetype.Font("media/fonts/BD_Cartoon_Shout.ttf", FONT_SIZE)
         self.__fonts['HUD'] = pygame.freetype.Font("media/fonts/joystixmonospace.ttf", FONT_SIZE)
         self.__fonts['strategy'] = pygame.freetype.Font("media/fonts/kingdomCome.TTF", FONT_SIZE)
 
+        DebugLogger.debug("------ FONTS ------")
         for i in self.__fonts:
-            logging.debug(i + ' = ' + str(self.__fonts[i]))
+            DebugLogger.debug(i + ' = ' + str(self.__fonts[i]))
 
     def getSound(self, sound):
         return self.__sounds[sound]

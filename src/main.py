@@ -20,12 +20,12 @@ class Game():
         self.settings = {}
         self.controls = {}
         self.parceJSON()
-        logging.info("Game was started")
+        InfoLogger.info("Game was started")
 
 # Load all resources
         self.assetMngr = AssetManager('media')
-        # self.assetMngr.loadImages()
-        self.assetMngr.loadSounds()
+        self.assetMngr.loadImages()
+        # self.assetMngr.loadSounds()
         # self.assetMngr.loadFonts()
 
         self.publisher = Subject()
@@ -41,7 +41,7 @@ class Game():
         self.manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
         self.createUIWidgets()
-        threading.Thread(target=self.playBgMusic).start()
+        # threading.Thread(target=self.playBgMusic).start()
 
     def loadProgress(self):
         with open("configs/savefile.txt", "r") as f:
@@ -68,9 +68,9 @@ class Game():
         for i in self.settings['controls']:
             self.controls[i] = self.settings['controls'][i]
 
-        logging.info("------ SETTINGS ------")
+        InfoLogger.info("------ SETTINGS ------")
         for i in self.settings:
-            logging.debug(i + ' = ' + str(self.settings[i]))
+            DebugLogger.debug(i + ' = ' + str(self.settings[i]))
 
     def createUIWidgets(self):
         self.CurrPercent = 70
@@ -208,9 +208,9 @@ class Game():
                 for widget in self.settingsControls:
                     self.controls[widget] = self.settingsControls[widget].get_text()
 
-                logging.info("------ Keys was changed ------")
+                InfoLogger.info("------ Keys was changed ------")
                 for widget in self.controls:
-                    logging.debug(widget + ' ' + self.controls[widget])
+                    DebugLogger.debug(widget + ' ' + self.controls[widget])
 
                 config.state = config.UIEnum.Main_menu.value
                 config.state = config.prev_state
@@ -300,9 +300,9 @@ class Game():
 
             if (self.currentLevel == LevelEnum.Strategy.value):
                 if(self.isLevelInit == False):
-                    self.level = Level()
+                    self.level = Level(self.assetMngr)
                     self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher, self.currentLevel)
-                    self.level.setup_level(self.player, self.currentLevel, "configs/strategy.txt")
+                    self.level.setup_level(self.player, self.currentLevel, "maps/strategy.tmx")
                     self.isLevelInit = True
 
                 if (self.isLevelInit == True):
@@ -310,11 +310,11 @@ class Game():
 
             if (self.currentLevel == LevelEnum.Shooter.value):
                 if(self.isLevelInit == False):
-                    self.level = Level()
+                    self.level = Level(self.assetMngr)
                     self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher, self.currentLevel)
-                    self.level.setup_level(self.player, self.currentLevel, "configs/shooter.txt")
+                    self.level.setup_level(self.player, self.currentLevel, "maps/shooter.txt")
                     #self.loadProgress()
-                    #logging.info(str(savedValues))
+                    #InfoLogger.info(str(savedValues))
                     self.isLevelInit = True
 
                 if (self.isLevelInit == True):
@@ -322,11 +322,11 @@ class Game():
 
             if (self.currentLevel == LevelEnum.Platformer.value):
                 if(self.isLevelInit == False):
-                    self.level = Level()
+                    self.level = Level(self.assetMngr)
                     self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher, self.currentLevel)
-                    self.level.setup_level(self.player, self.currentLevel, "configs/levelPlatformer.txt")
+                    self.level.setup_level(self.player, self.currentLevel, "maps/levelPlatformer.txt")
                     self.loadProgress()
-                    logging.info(str(savedValues))
+                    InfoLogger.info(str(savedValues))
                     self.isLevelInit = True
 
                 if (self.isLevelInit == True):
@@ -377,7 +377,7 @@ class Game():
 
             self.dt = self.clock.tick(FPS) / SPEED_SCALE
 
-        logging.info("Game was stopped")
+        InfoLogger.info("Game was stopped")
         pygame.quit()
 
 game = Game()
