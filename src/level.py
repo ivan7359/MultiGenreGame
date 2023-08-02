@@ -90,10 +90,8 @@ class Layer:
 			# InfoLogger.info(' ')
 
 class Parser:
-	def __init__(self, terrain, castles, landscape):
-		self.terrainLayer = terrain
-		self.castlesLayer = castles
-		self.landscapeLayer = landscape
+	def __init__(self, terrain):
+		self.terrainLayer = terrain		# ЭТО МАССИВ
 
 	def __getTerrainIDs(self, path):
 		with open(path, 'r') as f:
@@ -122,7 +120,7 @@ class Parser:
 								line = line[line.find('media') : len(line)]
 								line = line.replace('"/>\n', '')
 								line = line.split('/')[-1].split('.')[0]
-								self.terrainLayer.tilesDict[id] = line							# create dict
+								self.terrainLayer[0].tilesDict[id] = line							# create dict
 
 							break
 
@@ -142,17 +140,17 @@ class Parser:
 						id = line[line.find('firstgid=') : line.find(' name=')].split('"')[1]
 						
 						if(id != 1):
-							self.castlesLayer.numbers.add(id)
+							self.terrainLayer[1].numbers.add(id)
 
 							line = f.readline()
 							if(line.find('<image ') != -1):
 								line = line[line.find('source=') : line.find('width=')].split('"')[1]
 								line = line.split('/')[-1].split('.')[0]
 
-								self.castlesLayer.tilesDict[id] = line
+								self.terrainLayer[1].tilesDict[id] = line
 		
-		# for i in self.castlesLayer.tilesDict:
-		# 	InfoLogger.info(i + " " + self.castlesLayer.tilesDict[i])
+		# for i in self.terrainLayer[1].tilesDict:
+		# 	InfoLogger.info(i + " " + self.terrainLayer[1].tilesDict[i])
 
 	def __getLandscapeIDs(self, path):
 		with open(path, 'r') as f:
@@ -178,11 +176,11 @@ class Parser:
 							line = line.replace('"/>\n', '')
 							line = line.split('/')[-1].split('.')[0]
 							
-							self.landscapeLayer.tilesDict[id] = line
+							self.terrainLayer[2].tilesDict[id] = line
 						break
 
-		# for i in self.landscapeLayer.tilesDict:
-		# 	InfoLogger.info(i + " " + self.landscapeLayer.tilesDict[i])
+		# for i in self.terrainLayer[2].tilesDict:
+		# 	InfoLogger.info(i + " " + self.terrainLayer[2].tilesDict[i])
 
 	def mainParcer(self, path):
 		if path.split('.')[1] == 'txt':
@@ -216,23 +214,11 @@ class Parser:
 		self.__getLandscapeIDs(path)
 
 		# creating map from the file
-		self.terrainLayer.loadlayer(1)
-		self.castlesLayer.loadlayer(3)
-		self.landscapeLayer.loadlayer(4)
+		self.terrainLayer[0].loadlayer(1)
+		self.terrainLayer[1].loadlayer(3)
+		self.terrainLayer[2].loadlayer(4)
 
-class Tile(pygame.sprite.Sprite):
-	def __init__(self, assetMngr, pos, groups, img_path, rotation):
-		super().__init__(groups)
-		self.assetMngr = assetMngr
-
-		# self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
-		# self.image.fill('white')
-
-		self.image = self.assetMngr.getImage(img_path)
-		self.image = pygame.transform.rotate(self.image, rotation)
-		self.rect = self.image.get_rect(topleft = pos)
-
-class TileObj:
+class Tile:
 	def __init__(self, assetMngr, pos, isVisible, isCol, interaction, img_path, rotation):
 		self.display_surface = pygame.display.get_surface()
 		self.assetMngr = assetMngr
@@ -247,7 +233,7 @@ class TileObj:
 	def draw(self):
 		self.display_surface.blit(self.image, self.rect.topleft)
 
-class TileObjPool:
+class ObjectPool:
 	def __init__(self):
 		self.arr = []
 
@@ -284,47 +270,43 @@ class Level:
 	def __init__(self, assetMngr):
 		self.display_surface = pygame.display.get_surface()
 		self.assetMngr = assetMngr
-		self.objPool = TileObjPool()
-
-		# sprite group setup
-		# self.visible_sprites = CameraGroup()
-		self.camera = CameraGroup(self.objPool)
-		# self.active_sprites = pygame.sprite.Group()
-		# self.collision_sprites = pygame.sprite.Group()
-
-		# self.spritesGroup = [self.visible_sprites, self.collision_sprites]
+		self.tiles = ObjectPool()
+		self.camera = Camera(self.tiles)
 
 	def setup_level(self, player, currentLevel, path):
 		self.player = player
 
-		self.terrainLayer = Layer(path)
-		self.castlesLayer = Layer(path)
-		self.landscapeLayer = Layer(path)
-
-		self.parser = Parser(self.terrainLayer, self.castlesLayer, self.landscapeLayer)
-		self.parser.mainParcer(path)
-
 		if (currentLevel == LevelEnum.Strategy.value):
-			self.strategyLoader(self.terrainLayer)
-			self.strategyLoader(self.castlesLayer)
-			self.strategyLoader(self.landscapeLayer)
+			self.terrainLayer = [Layer(path), Layer(path), Layer(path)]
+
+			self.parser = Parser(self.terrainLayer)
+			self.parser.mainParcer(path)
+			
+			self.strategyLoader(self.terrainLayer[0])
+			self.strategyLoader(self.terrainLayer[1])
+			self.strategyLoader(self.terrainLayer[2])
 
 		if (currentLevel == LevelEnum.Shooter.value):
-			self.shooterLoader()
+			self.terrainLayer = Layer(path)
+			
+			self.parser = Parser(self.terrainLayer, self.castlesLayer, self.landscapeLayer)
+			self.parser.mainParcer(path)
+
+			self.shooterLoader(self.terrainLayer)
 
 		if (currentLevel == LevelEnum.Platformer.value):
 			self.platformerLoader()
 
-	def shooterLoader(self):
+	def shooterLoader(self, layer):
 		# for row_index,row in enumerate(self.matrix):
-		for row_index,row in enumerate(self.levelMap):
+		for row_index,row in enumerate(layer.map):
 			for col_index,col in enumerate(row):
 				x = col_index * TILE_SIZE
 				y = row_index * TILE_SIZE
 				for currWall in range(1, 115):
 					if col == str(currWall):
-					# if col in ['15', '17', '99']:
-						Tile(self.assetMngr, (x,y),self.spritesGroup)
+						# Tile(self.assetMngr, (x,y),self.spritesGroup)
+						self.tiles.append(Tile(self.assetMngr, (x,y), True, True, TileEnum._None.value, layer.tilesDict[col[0]], col[1]))
 					if col == '18324':
 						self.player.setPos(x, y)
 
@@ -335,8 +317,7 @@ class Level:
 				y = row_index * TILE_SIZE
 
 				if col[0] in layer.numbers and col[0] != '0':
-					# Tile(self.assetMngr, (x,y), self.spritesGroup, layer.tilesDict[col[0]], col[1])
-					self.objPool.append(TileObj(self.assetMngr, (x,y), True, True, TileEnum._None.value, layer.tilesDict[col[0]], col[1]))
+					self.tiles.append(Tile(self.assetMngr, (x,y), True, True, TileEnum._None.value, layer.tilesDict[col[0]], col[1]))
 				if col[0] == '18324':
 					self.player.setPos(x, y)
 					
@@ -360,20 +341,15 @@ class Level:
 		return self.collision_sprites
 
 	def update(self, dt):
-		# self.active_sprites.update(dt)
 		self.player.update(dt)
-		self.objPool.draw()
+		self.camera.followPlayer(self.player)
 		self.player.draw()
-		# self.visible_sprites.custom_draw(self.player)
-		# self.camera.custom_draw(self.player)
 		
-
-class CameraGroup(pygame.sprite.Group):
-	def __init__(self, objPool):
-		super().__init__()
+class Camera:
+	def __init__(self, tiles):
 		self.display_surface = pygame.display.get_surface()
 		self.offset = pygame.math.Vector2(100, 300)
-		self.objPool = objPool
+		self.tiles = tiles
 
 		# center camera setup 
 		self.half_w = self.display_surface.get_size()[0] // 2
@@ -387,8 +363,7 @@ class CameraGroup(pygame.sprite.Group):
 
 		self.camera_rect = pygame.Rect(cam_left, cam_top, cam_width, cam_height)
 
-	def custom_draw(self, player):
-
+	def followPlayer(self, player):
 		# get the player offset 
 		self.offset.x = player.rect.centerx - self.half_w
 		self.offset.y = player.rect.centery - self.half_h
@@ -408,7 +383,6 @@ class CameraGroup(pygame.sprite.Group):
 			self.camera_rect.left - CAMERA_BORDERS['left'],
 			self.camera_rect.top - CAMERA_BORDERS['top'])
 
-		for sprite in self.objPool.getOptionsArr(True, True, None):
+		for sprite in self.tiles.getArr():
 			offset_pos = sprite.rect.topleft - self.offset
 			self.display_surface.blit(sprite.image, offset_pos)
-
