@@ -303,7 +303,9 @@ class Game():
                     
                     self.level = Level(self.assetMngr)
                     self.player = Player(self.level.tiles, self.publisher, self.currentLevel)
-                    self.level.setup_level(self.player, self.currentLevel, "maps/strategy.tmx")
+                    self.arrPath = ["maps/strategy.tmx"]
+                    self.level.setup_level(self.player, self.currentLevel, self.arrPath)
+                    # self.level.setup_level(self.player, self.currentLevel, "maps/strategy.tmx")
                     self.isLevelInit = True
 
                 if (self.isLevelInit == True):
@@ -312,8 +314,9 @@ class Game():
             if (self.currentLevel == LevelEnum.Shooter.value):
                 if(self.isLevelInit == False):
                     self.level = Level(self.assetMngr)
-                    self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher, self.currentLevel)
-                    self.level.setup_level(self.player, self.currentLevel, "maps/shooter.txt")
+                    self.player = Player(self.level.tiles, self.publisher, self.currentLevel)
+                    self.arrPath = ["maps/shooter.txt", "media/Shooter/img/WallTiles.png"]
+                    self.level.setup_level(self.player, self.currentLevel, self.arrPath)
                     #self.loadProgress()
                     #InfoLogger.info(str(savedValues))
                     self.isLevelInit = True

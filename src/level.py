@@ -9,8 +9,9 @@ P180 = M90 * 2
 ID_OFFSET = 986
 
 class Layer:
-	def __init__(self, path):
+	def __init__(self, path, state):
 		self.path = path
+		self.state = state
 
 		self.map = []
 		self.numbers = set()
@@ -36,7 +37,14 @@ class Layer:
 		else:
 			return [id, 0]
 
-	def loadlayer(self, desirable_layer):
+	def loadlayer(self, desirable_layer= 0):
+		if (self.state == LevelEnum.Strategy.value):
+			self.loadStrategylayer(desirable_layer)
+
+		if (self.state == LevelEnum.Shooter.value):
+			self.loadShooterLayer()
+
+	def loadStrategylayer(self, desirable_layer):
 		with open(self.path, 'r') as f:
 			while True:
 				line = f.readline()
@@ -89,9 +97,24 @@ class Layer:
 
 			# InfoLogger.info(' ')
 
+	def loadShooterLayer(self):
+		with open(self.path, "r") as f:
+			while True:
+				line = f.readline()
+
+				if not line:
+					break
+				
+				line = line.replace('\n', '').split(',')
+				self.map.append(line)
+				
+				# for i in line:
+				# 	self.terrainLayer[0].numbers.add(i)
+
 class Parser:
-	def __init__(self, terrain):
+	def __init__(self, terrain, assetMngr):
 		self.terrainLayer = terrain		# ЭТО МАССИВ
+		self.assetMngr = assetMngr
 
 	def __getTerrainIDs(self, path):
 		with open(path, 'r') as f:
@@ -120,7 +143,9 @@ class Parser:
 								line = line[line.find('media') : len(line)]
 								line = line.replace('"/>\n', '')
 								line = line.split('/')[-1].split('.')[0]
-								self.terrainLayer[0].tilesDict[id] = line							# create dict
+
+								image = self.assetMngr.getImage(line)
+								self.terrainLayer[0].tilesDict[id] = image							# create dict
 
 							break
 
@@ -147,7 +172,8 @@ class Parser:
 								line = line[line.find('source=') : line.find('width=')].split('"')[1]
 								line = line.split('/')[-1].split('.')[0]
 
-								self.terrainLayer[1].tilesDict[id] = line
+								image = self.assetMngr.getImage(line)
+								self.terrainLayer[1].tilesDict[id] = image
 		
 		# for i in self.terrainLayer[1].tilesDict:
 		# 	InfoLogger.info(i + " " + self.terrainLayer[1].tilesDict[i])
@@ -176,37 +202,44 @@ class Parser:
 							line = line.replace('"/>\n', '')
 							line = line.split('/')[-1].split('.')[0]
 							
-							self.terrainLayer[2].tilesDict[id] = line
+							image = self.assetMngr.getImage(line)
+							self.terrainLayer[2].tilesDict[id] = image
 						break
 
 		# for i in self.terrainLayer[2].tilesDict:
 		# 	InfoLogger.info(i + " " + self.terrainLayer[2].tilesDict[i])
 
+	def __getTilesFromTileset(self, path, size, scale_factor= 1):
+		tileset = pygame.image.load(path).convert()
+		tileset = pygame.transform.scale(tileset, (tileset.get_width() / scale_factor, tileset.get_height() / scale_factor))
+
+		id = 1
+
+		for y in range(size[1]):			# size[1] - height
+			for x in range(size[0]):		# size[0] - width
+				self.terrainLayer[0].tilesDict[str(id)] = tileset.subsurface([x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE])
+				id += 1
+
+		# for i in self.terrainLayer[0].tilesDict:
+		# 	InfoLogger.info(str(i) + " " + str(self.terrainLayer[0].tilesDict[i]))
+
 	def mainParcer(self, path):
-		if path.split('.')[1] == 'txt':
+		print(path[0].split('.'))
+
+		if path[0].split('.')[1] == 'txt':
 			InfoLogger.info("Loading .txt map")
 			self.parceTXT(path)
 		else:
 			InfoLogger.info("Loading .tmx map")
-			self.parceTMX(path)
+			self.parceTMX(path[0])
 
 	def parceTXT(self, path):
-		with open(path, "r") as f:
+		# creating [id] = [image] dictionary
+		self.__getTilesFromTileset(path[1], (6, 18), 2)
 
-			while True:
-				line = f.readline()
-
-				if not line:
-					break
-				
-				line = line.replace('\n', '').split(',')
-				self.levelMap.append(line)
-				
-				for i in line:
-					self.mapNumbers.add(i)
-
-		print(self.mapNumbers)
-
+		# creating map from the file
+		self.terrainLayer[0].loadlayer()
+		
 	def parceTMX(self, path):
 		# creating [id] = [image's path] dictionary
 		self.__getTerrainIDs(path)
@@ -219,14 +252,15 @@ class Parser:
 		self.terrainLayer[2].loadlayer(4)
 
 class Tile:
-	def __init__(self, assetMngr, pos, isVisible, isCol, interaction, img_path, rotation):
+	def __init__(self, assetMngr, pos, isVisible, isCol, interaction, image, rotation):
 		self.display_surface = pygame.display.get_surface()
 		self.assetMngr = assetMngr
 		self.isVisible = isVisible
 		self.isCol = isCol
 		self.interaction = interaction
-		
-		self.image = self.assetMngr.getImage(img_path)
+
+		# self.image = self.assetMngr.getImage(img_path)
+		self.image = image
 		self.image = pygame.transform.rotate(self.image, rotation)
 		self.rect = self.image.get_rect(topleft = pos)
 
@@ -277,9 +311,11 @@ class Level:
 		self.player = player
 
 		if (currentLevel == LevelEnum.Strategy.value):
-			self.terrainLayer = [Layer(path), Layer(path), Layer(path)]
+			print("path[0]: ", path[0])
 
-			self.parser = Parser(self.terrainLayer)
+			self.terrainLayer = [Layer(path[0], currentLevel), Layer(path[0], currentLevel), Layer(path[0], currentLevel)]
+
+			self.parser = Parser(self.terrainLayer, self.assetMngr)
 			self.parser.mainParcer(path)
 			
 			self.strategyLoader(self.terrainLayer[0])
@@ -287,12 +323,12 @@ class Level:
 			self.strategyLoader(self.terrainLayer[2])
 
 		if (currentLevel == LevelEnum.Shooter.value):
-			self.terrainLayer = Layer(path)
+			self.terrainLayer = [Layer(path[0], currentLevel)]
 			
-			self.parser = Parser(self.terrainLayer, self.castlesLayer, self.landscapeLayer)
+			self.parser = Parser(self.terrainLayer, self.assetMngr)
 			self.parser.mainParcer(path)
 
-			self.shooterLoader(self.terrainLayer)
+			self.shooterLoader(self.terrainLayer[0])
 
 		if (currentLevel == LevelEnum.Platformer.value):
 			self.platformerLoader()
@@ -305,8 +341,7 @@ class Level:
 				y = row_index * TILE_SIZE
 				for currWall in range(1, 115):
 					if col == str(currWall):
-						# Tile(self.assetMngr, (x,y),self.spritesGroup)
-						self.tiles.append(Tile(self.assetMngr, (x,y), True, True, TileEnum._None.value, layer.tilesDict[col[0]], col[1]))
+						self.tiles.append(Tile(self.assetMngr, (x,y), True, True, TileEnum._None.value, layer.tilesDict[col[0]], 0))
 					if col == '18324':
 						self.player.setPos(x, y)
 
