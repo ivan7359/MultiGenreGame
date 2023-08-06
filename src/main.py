@@ -327,10 +327,11 @@ class Game():
             if (self.currentLevel == LevelEnum.Platformer.value):
                 if(self.isLevelInit == False):
                     self.level = Level(self.assetMngr)
-                    self.player = Player(self.level.getGroups(), self.level.getCollSprites(), self.publisher, self.currentLevel)
-                    self.level.setup_level(self.player, self.currentLevel, "maps/levelPlatformer.txt")
-                    self.loadProgress()
-                    InfoLogger.info(str(savedValues))
+                    self.player = Player(self.level.tiles, self.publisher, self.currentLevel)
+                    self.arrPath = ["maps/levelPlatformer.txt", "media/Platformer/img/Environment/Tileset2.png"]
+                    self.level.setup_level(self.player, self.currentLevel, self.arrPath)
+                    # self.loadProgress()
+                    # InfoLogger.info(str(savedValues))
                     self.isLevelInit = True
 
                 if (self.isLevelInit == True):

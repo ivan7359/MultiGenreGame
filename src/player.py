@@ -83,10 +83,11 @@ class Player(pygame.sprite.Sprite):
 		
 		if(self.state == LevelEnum.Platformer.value):
 			if(self.on_floor == False):
-				self.direction.y += self.gravity
-				self.rect.y += self.direction.y * dt
+				# self.direction.y += self.gravity
+				# self.rect.y += self.direction.y * dt
+				pass
 		
-				self.vertical_collisions()
+				# self.vertical_collisions()
 
 		if(self.state == LevelEnum.Strategy.value):
 			if(self.isMoving[1] == True):

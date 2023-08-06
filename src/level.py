@@ -40,9 +40,9 @@ class Layer:
 	def loadlayer(self, desirable_layer= 0):
 		if (self.state == LevelEnum.Strategy.value):
 			self.loadStrategylayer(desirable_layer)
-
-		if (self.state == LevelEnum.Shooter.value):
-			self.loadShooterLayer()
+		
+		if (self.state == LevelEnum.Shooter.value or  self.state == LevelEnum.Platformer.value):
+			self.loadOtherLayer()
 
 	def loadStrategylayer(self, desirable_layer):
 		with open(self.path, 'r') as f:
@@ -97,7 +97,7 @@ class Layer:
 
 			# InfoLogger.info(' ')
 
-	def loadShooterLayer(self):
+	def loadOtherLayer(self):
 		with open(self.path, "r") as f:
 			while True:
 				line = f.readline()
@@ -223,19 +223,22 @@ class Parser:
 		# for i in self.terrainLayer[0].tilesDict:
 		# 	InfoLogger.info(str(i) + " " + str(self.terrainLayer[0].tilesDict[i]))
 
-	def mainParcer(self, path):
-		print(path[0].split('.'))
+	def mainParcer(self, path, currentLevel):
 
 		if path[0].split('.')[1] == 'txt':
 			InfoLogger.info("Loading .txt map")
-			self.parceTXT(path)
+			self.parceTXT(path, currentLevel)
 		else:
 			InfoLogger.info("Loading .tmx map")
 			self.parceTMX(path[0])
 
-	def parceTXT(self, path):
+	def parceTXT(self, path, currentLevel):
 		# creating [id] = [image] dictionary
-		self.__getTilesFromTileset(path[1], (6, 18), 2)
+		if (currentLevel == LevelEnum.Shooter.value):
+			self.__getTilesFromTileset(path[1], (6, 18), 2)
+
+		if (currentLevel == LevelEnum.Platformer.value):
+			self.__getTilesFromTileset(path[1], (8, 18), 1)
 
 		# creating map from the file
 		self.terrainLayer[0].loadlayer()
@@ -316,7 +319,7 @@ class Level:
 			self.terrainLayer = [Layer(path[0], currentLevel), Layer(path[0], currentLevel), Layer(path[0], currentLevel)]
 
 			self.parser = Parser(self.terrainLayer, self.assetMngr)
-			self.parser.mainParcer(path)
+			self.parser.mainParcer(path, currentLevel)
 			
 			self.strategyLoader(self.terrainLayer[0])
 			self.strategyLoader(self.terrainLayer[1])
@@ -326,24 +329,17 @@ class Level:
 			self.terrainLayer = [Layer(path[0], currentLevel)]
 			
 			self.parser = Parser(self.terrainLayer, self.assetMngr)
-			self.parser.mainParcer(path)
+			self.parser.mainParcer(path, currentLevel)
 
 			self.shooterLoader(self.terrainLayer[0])
 
 		if (currentLevel == LevelEnum.Platformer.value):
-			self.platformerLoader()
+			self.terrainLayer = [Layer(path[0], currentLevel)]
+			
+			self.parser = Parser(self.terrainLayer, self.assetMngr)
+			self.parser.mainParcer(path, currentLevel)
 
-	def shooterLoader(self, layer):
-		# for row_index,row in enumerate(self.matrix):
-		for row_index,row in enumerate(layer.map):
-			for col_index,col in enumerate(row):
-				x = col_index * TILE_SIZE
-				y = row_index * TILE_SIZE
-				for currWall in range(1, 115):
-					if col == str(currWall):
-						self.tiles.append(Tile(self.assetMngr, (x,y), True, True, TileEnum._None.value, layer.tilesDict[col[0]], 0))
-					if col == '18324':
-						self.player.setPos(x, y)
+			self.platformerLoader(self.terrainLayer[0])
 
 	def strategyLoader(self, layer):
 		for row_index, row in enumerate(layer.map):
@@ -355,19 +351,29 @@ class Level:
 					self.tiles.append(Tile(self.assetMngr, (x,y), True, True, TileEnum._None.value, layer.tilesDict[col[0]], col[1]))
 				if col[0] == '18324':
 					self.player.setPos(x, y)
-					
-	def platformerLoader(self):
-		for row_index,row in enumerate(self.levelMap):
-			for col_index,col in enumerate(row):
+
+	def shooterLoader(self, layer):
+		# for row_index,row in enumerate(self.matrix):
+		for row_index, row in enumerate(layer.map):
+			for col_index, col in enumerate(row):
 				x = col_index * TILE_SIZE
 				y = row_index * TILE_SIZE
-				if col == "1":
-					Tile(self.assetMngr, (x,y),self.spritesGroup)
-				if col == '7':
-					self.player.setPos(x, y)
-				if col == "C":
-					pass
-					# self.player = Player((x,y),[self.visible_sprites,self.active_sprites],self.collision_sprites)
+				for currWall in layer.tilesDict.keys():
+					if col == str(currWall):
+						self.tiles.append(Tile(self.assetMngr, (x,y), True, True, TileEnum._None.value, layer.tilesDict[col[0]], 0))
+					if col == '18324':
+						self.player.setPos(x, y)
+					
+	def platformerLoader(self, layer):
+		for row_index, row in enumerate(layer.map):
+			for col_index, col in enumerate(row):
+				x = col_index * TILE_SIZE
+				y = row_index * TILE_SIZE
+				for currWall in layer.tilesDict.keys():
+					if col == str(currWall):
+						self.tiles.append(Tile(self.assetMngr, (x,y), True, True, TileEnum._None.value, layer.tilesDict[col[0]], 0))
+					if col == '18324':
+						self.player.setPos(x, y)
 
 	def getGroups(self):
 		return [self.visible_sprites, self.active_sprites]
