@@ -10,7 +10,8 @@ class Player(pygame.sprite.Sprite):
 		self.state = state
 		self.image = pygame.Surface((TILE_SIZE // 2,TILE_SIZE))
 		self.image.fill('green')
-		self.rect = self.image.get_rect(center = (0, 0))
+		self.rect = self.image.get_rect(center = (WIDTH / 2, HEIGHT / 2))
+		self.coord_offset = pygame.math.Vector2()
 
 		# player movement 
 		self.direction = pygame.math.Vector2()
@@ -43,8 +44,8 @@ class Player(pygame.sprite.Sprite):
 			self.direction.y = direction
 
 	def setPos(self, x, y):
-		self.rect.x = x
-		self.rect.y = y
+		self.coord_offset.x = x
+		self.coord_offset.y = y
 
 	def horizontal_collisions(self):
 		for sprite in self.collision_sprites.sprites():
@@ -78,7 +79,7 @@ class Player(pygame.sprite.Sprite):
 				self.movement_sound_timer = SOUND_PLAYING_DELAY
 				self.publisher.notify(EventsEnum.movement.value)
 	
-			self.rect.x += self.direction.x * self.speed * dt
+			# self.rect.x += self.direction.x * self.speed * dt
 			# self.horizontal_collisions()
 		
 		if(self.state == LevelEnum.Platformer.value):
@@ -90,8 +91,9 @@ class Player(pygame.sprite.Sprite):
 				# self.vertical_collisions()
 
 		if(self.state == LevelEnum.Strategy.value):
-			if(self.isMoving[1] == True):
-				self.rect.y += self.direction.y * self.speed * dt
+			# if(self.isMoving[1] == True):
+			# 	self.rect.y += self.direction.y * self.speed * dt
+			pass
 
 	def draw(self):
 		self.display_surface.blit(self.image, self.rect.topleft)

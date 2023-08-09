@@ -137,7 +137,6 @@ class Parser:
 									break
 
 								id = str(int(line[line.find('"') + 1 : line.rfind('"')]))	# get ID
-								print(id)
 
 								line = f.readline()									# get path of the image
 								line = line[line.find('media') : len(line)]
@@ -255,7 +254,7 @@ class Parser:
 		self.terrainLayer[2].loadlayer(4)
 
 class Tile:
-	def __init__(self, assetMngr, pos, isVisible, isCol, interaction, image, rotation):
+	def __init__(self, assetMngr, pos, isVisible, isCol, interaction, image, rotation, scale):
 		self.display_surface = pygame.display.get_surface()
 		self.assetMngr = assetMngr
 		self.isVisible = isVisible
@@ -265,6 +264,7 @@ class Tile:
 		# self.image = self.assetMngr.getImage(img_path)
 		self.image = image
 		self.image = pygame.transform.rotate(self.image, rotation)
+		self.image = pygame.transform.scale(self.image, (self.image.get_width() / scale, self.image.get_height() / scale))
 		self.rect = self.image.get_rect(topleft = pos)
 
 	def draw(self):
@@ -304,9 +304,12 @@ class ObjectPool:
 		return tmp
 
 class Level:
-	def __init__(self, assetMngr):
+	def __init__(self, assetMngr, isMiniMap= False):
 		self.display_surface = pygame.display.get_surface()
 		self.assetMngr = assetMngr
+		self.isMiniMap = isMiniMap
+
+		self.scale = 16
 		self.tiles = ObjectPool()
 		self.camera = Camera(self.tiles)
 
@@ -314,16 +317,19 @@ class Level:
 		self.player = player
 
 		if (currentLevel == LevelEnum.Strategy.value):
-			print("path[0]: ", path[0])
-
 			self.terrainLayer = [Layer(path[0], currentLevel), Layer(path[0], currentLevel), Layer(path[0], currentLevel)]
 
 			self.parser = Parser(self.terrainLayer, self.assetMngr)
 			self.parser.mainParcer(path, currentLevel)
-			
-			self.strategyLoader(self.terrainLayer[0])
-			self.strategyLoader(self.terrainLayer[1])
-			self.strategyLoader(self.terrainLayer[2])
+				
+			if (self.isMiniMap == True):
+				self.strategyLoader(self.terrainLayer[0], self.scale)
+				self.strategyLoader(self.terrainLayer[1], self.scale)
+				self.strategyLoader(self.terrainLayer[2], self.scale)
+			else:
+				self.strategyLoader(self.terrainLayer[0])
+				self.strategyLoader(self.terrainLayer[1])
+				self.strategyLoader(self.terrainLayer[2])
 
 		if (currentLevel == LevelEnum.Shooter.value):
 			self.terrainLayer = [Layer(path[0], currentLevel)]
@@ -341,14 +347,20 @@ class Level:
 
 			self.platformerLoader(self.terrainLayer[0])
 
-	def strategyLoader(self, layer):
+	def strategyLoader(self, layer, scale= 1):
 		for row_index, row in enumerate(layer.map):
 			for col_index, col in enumerate(row):
-				x = col_index * TILE_SIZE
-				y = row_index * TILE_SIZE
+				if(self.isMiniMap == True):
+					x = ((col_index * TILE_SIZE) / scale) + WIDTH - (len(layer.map) * 2)
+					y = (row_index * TILE_SIZE) / scale
+				
+				else:
+					x = (col_index * TILE_SIZE) / scale
+					y = (row_index * TILE_SIZE) / scale
 
 				if col[0] in layer.numbers and col[0] != '0':
-					self.tiles.append(Tile(self.assetMngr, (x,y), True, True, TileEnum._None.value, layer.tilesDict[col[0]], col[1]))
+					self.tiles.append(Tile(self.assetMngr, (x, y), True, True, TileEnum._None.value, layer.tilesDict[col[0]], col[1], scale))
+				
 				if col[0] == '18324':
 					self.player.setPos(x, y)
 
@@ -383,7 +395,7 @@ class Level:
 
 	def update(self, dt):
 		self.player.update(dt)
-		self.camera.followPlayer(self.player)
+		self.camera.followPlayer(dt, self.player, self.scale, self.isMiniMap)	# Draw the map
 		self.player.draw()
 		
 class Camera:
@@ -391,10 +403,11 @@ class Camera:
 		self.display_surface = pygame.display.get_surface()
 		self.offset = pygame.math.Vector2(100, 300)
 		self.tiles = tiles
+		self.offset_pos = pygame.math.Vector2()
 
 		# center camera setup 
-		self.half_w = self.display_surface.get_size()[0] // 2
-		self.half_h = self.display_surface.get_size()[1] // 2
+		# self.half_w = self.display_surface.get_size()[0] // 2
+		# self.half_h = self.display_surface.get_size()[1] // 2
 
 		# camera
 		cam_left = CAMERA_BORDERS['left']
@@ -403,27 +416,40 @@ class Camera:
 		cam_height = self.display_surface.get_size()[1] - (cam_top + CAMERA_BORDERS['bottom'])
 
 		self.camera_rect = pygame.Rect(cam_left, cam_top, cam_width, cam_height)
+		self.prev_camera_rect = pygame.Rect(cam_left, cam_top, cam_width, cam_height)
 
-	def followPlayer(self, player):
+	def followPlayer(self, dt, player, scale, isMiniMap= False):
 		# get the player offset 
-		self.offset.x = player.rect.centerx - self.half_w
-		self.offset.y = player.rect.centery - self.half_h
+		# self.offset.x = player.rect.centerx - self.half_w
+		# self.offset.y = player.rect.centery - self.half_h
 
 		# getting the camera position
 		if player.rect.left < self.camera_rect.left:
 			self.camera_rect.left = player.rect.left
+
 		if player.rect.right > self.camera_rect.right:
 			self.camera_rect.right = player.rect.right
+
 		if player.rect.top < self.camera_rect.top:
 			self.camera_rect.top = player.rect.top
+
 		if player.rect.bottom > self.camera_rect.bottom:
 			self.camera_rect.bottom = player.rect.bottom
 
-		# camera offset 
 		self.offset = pygame.math.Vector2(
 			self.camera_rect.left - CAMERA_BORDERS['left'],
 			self.camera_rect.top - CAMERA_BORDERS['top'])
 
 		for sprite in self.tiles.getArr():
-			offset_pos = sprite.rect.topleft - self.offset
-			self.display_surface.blit(sprite.image, offset_pos)
+			if (isMiniMap == False):
+				if(player.isMoving[0] == True):
+					sprite.rect.left -= player.direction.x * player.speed * dt
+				
+				if(player.isMoving[1] == True):
+					sprite.rect.top -= player.direction.y * player.speed * dt
+
+			# self.offset_pos = sprite.rect.topleft - self.offset
+			self.display_surface.blit(sprite.image, sprite.rect)
+
+		# Camera rectangle for debug 
+		# pygame.draw.rect(self.display_surface, (255, 0, 0), self.camera_rect, 8)

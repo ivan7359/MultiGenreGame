@@ -237,7 +237,6 @@ class Game():
                 self.assetMngr.setSoundVolume(self.backgroundMusic, event.value / 100)
                 print('Music_slider:', event.value / 100)
 
-
         if event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
             if (event.ui_element == self.settingsWidgets['Resolution_DDM']):
                 res = event.text.split('x')
@@ -302,21 +301,26 @@ class Game():
                 if(self.isLevelInit == False):
                     
                     self.level = Level(self.assetMngr)
+                    self.miniMap = Level(self.assetMngr, True)
+
                     self.player = Player(self.level.tiles, self.publisher, self.currentLevel)
-                    self.arrPath = ["maps/strategy.tmx"]
-                    self.level.setup_level(self.player, self.currentLevel, self.arrPath)
-                    # self.level.setup_level(self.player, self.currentLevel, "maps/strategy.tmx")
+                    arrPath = ["maps/strategy.tmx"]
+                    
+                    self.level.setup_level(self.player, self.currentLevel, arrPath)
+                    self.miniMap.setup_level(self.player, self.currentLevel, arrPath)
+                    
                     self.isLevelInit = True
 
                 if (self.isLevelInit == True):
                     self.level.update(self.dt)
+                    self.miniMap.update(self.dt)
 
             if (self.currentLevel == LevelEnum.Shooter.value):
                 if(self.isLevelInit == False):
                     self.level = Level(self.assetMngr)
                     self.player = Player(self.level.tiles, self.publisher, self.currentLevel)
-                    self.arrPath = ["maps/shooter.txt", "media/Shooter/img/WallTiles.png"]
-                    self.level.setup_level(self.player, self.currentLevel, self.arrPath)
+                    arrPath = ["maps/shooter.txt", "media/Shooter/img/WallTiles.png"]
+                    self.level.setup_level(self.player, self.currentLevel, arrPath)
                     #self.loadProgress()
                     #InfoLogger.info(str(savedValues))
                     self.isLevelInit = True
@@ -328,8 +332,8 @@ class Game():
                 if(self.isLevelInit == False):
                     self.level = Level(self.assetMngr)
                     self.player = Player(self.level.tiles, self.publisher, self.currentLevel)
-                    self.arrPath = ["maps/levelPlatformer.txt", "media/Platformer/img/Environment/Tileset2.png"]
-                    self.level.setup_level(self.player, self.currentLevel, self.arrPath)
+                    arrPath = ["maps/levelPlatformer.txt", "media/Platformer/img/Environment/Tileset2.png"]
+                    self.level.setup_level(self.player, self.currentLevel, arrPath)
                     # self.loadProgress()
                     # InfoLogger.info(str(savedValues))
                     self.isLevelInit = True
