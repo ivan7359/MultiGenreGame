@@ -2,10 +2,10 @@ import pygame
 from config import *
 
 class Player(pygame.sprite.Sprite):
-	def __init__(self, objSprites, publisher):
+	def __init__(self, world, publisher):
 		# super().__init__(groups)
 		self.display_surface = pygame.display.get_surface()
-		self.objSprites = objSprites
+		self.world = world
 		self.publisher = publisher
 		self.image = pygame.Surface((TILE_SIZE // 2,TILE_SIZE))
 		self.image.fill('green')

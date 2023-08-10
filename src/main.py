@@ -42,6 +42,8 @@ class Game():
         self.createUIWidgets()
         # threading.Thread(target=self.playBgMusic).start()
 
+        self.enemies = EnemiesObjectPool()
+
     def loadProgress(self):
         with open("configs/savefile.txt", "r") as f:
             while True:
@@ -332,13 +334,15 @@ class Game():
                     # self.loadProgress()
                     # InfoLogger.info(str(savedValues))
 
-                    l_enemy_spawner = Spawner(LiteEnemy(self.level.tiles, self.publisher))
-                    r_enemy_spawner = Spawner(RegularEnemy(self.level.tiles, self.publisher))
-                    h_enemy_spawner = Spawner(HeavyEnemy(self.level.tiles, self.publisher))
+                    # Creating spawners of an enemies
+                    l_enemy_spawner = Spawner(LiteEnemy(self.level.tiles, self.publisher), (300, 300))
+                    r_enemy_spawner = Spawner(RegularEnemy(self.level.tiles, self.publisher), (400, 300))
+                    h_enemy_spawner = Spawner(HeavyEnemy(self.level.tiles, self.publisher), (500, 300))
 
-                    self.l_enemy = l_enemy_spawner.spawnAnEnemy((300, 300))
-                    self.r_enemy = r_enemy_spawner.spawnAnEnemy((400, 300))
-                    self.h_enemy = h_enemy_spawner.spawnAnEnemy((500, 300))
+                    # Adding enemies into the level
+                    # self.enemies.append(l_enemy_spawner.spawnAnEnemy())
+                    # self.enemies.append(r_enemy_spawner.spawnAnEnemy())
+                    # self.enemies.append(h_enemy_spawner.spawnAnEnemy())
 
                     self.isLevelInit = True
 
@@ -381,9 +385,7 @@ class Game():
     def render(self):
         self.manager.draw_ui(self.screen)
 
-        self.l_enemy.draw()
-        self.r_enemy.draw()
-        self.h_enemy.draw()
+        self.enemies.drawAllEnemies()
 
         pygame.display.update()
 

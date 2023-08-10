@@ -268,7 +268,7 @@ class Tile:
 	def draw(self):
 		self.display_surface.blit(self.image, self.rect.topleft)
 
-class ObjectPool:
+class TilesObjectPool:
 	def __init__(self):
 		self.arr = []
 
@@ -308,7 +308,7 @@ class Level:
 		self.isMiniMap = isMiniMap
 
 		self.scale = 16
-		self.tiles = ObjectPool()
+		self.tiles = TilesObjectPool()
 		self.camera = Camera(self.tiles)
 
 	def setup_level(self, player, path):

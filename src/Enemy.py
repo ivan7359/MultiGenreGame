@@ -39,8 +39,51 @@ class HeavyEnemy(Entity):
 ########################################################################
 
 class Spawner:
-    def __init__(self, prototype):
+    def __init__(self, prototype, pos):
         self.prototype = prototype
+        self.pos = pos
 
-    def spawnAnEnemy(self, pos):
-        return self.prototype.clone(pos)
+    def spawnAnEnemy(self):
+        return self.prototype.clone(self.pos)
+    
+class EnemiesObjectPool:
+	def __init__(self):
+		self.arr = []
+
+	def append(self, obj):
+		obj.id = len(self.arr)
+		self.arr.append(obj)
+
+	def getAllEnemies(self):
+		return self.arr
+
+	def getCurrentEnemies(self, _class):
+		tmp = []
+
+		for obj in self.arr:
+			if (isinstance(obj, _class)):
+				tmp.append(obj)
+
+		return tmp
+
+	def getLiteEnemies(self):
+		return self.getCurrentEnemies(LiteEnemy)
+
+	def getRegularEnemies(self):
+		return self.getCurrentEnemies(RegularEnemy)
+
+	def getHeavyEnemies(self):
+		return self.getCurrentEnemies(HeavyEnemy)
+
+	def getEnemyById(self, id):
+		for obj in self.arr:
+			if (obj.id == id):
+				return obj
+			
+		return None
+
+	def drawAllEnemies(self):
+		for obj in self.arr:
+			obj.draw()
+
+

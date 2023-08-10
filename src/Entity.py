@@ -3,6 +3,7 @@ from config import *
 
 class Entity:
     def __init__(self, objSprites, publisher, pos= (0, 0)):
+        self.id = 0
         self.display_surface = pygame.display.get_surface()
         self.objSprites = objSprites
         self.publisher = publisher
