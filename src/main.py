@@ -329,7 +329,7 @@ class Game():
                 if(self.isLevelInit == False):
                     self.level = Level(self.assetMngr, self.publisher)
                     self.player = Player(self.level.tiles, self.publisher)
-                    arrPath = ["maps/levelPlatformer.txt", "media/Platformer/img/Environment/Tileset2.png"]
+                    arrPath = ["maps/platformer/Platformer.txt", "maps/platformer/LayerCoins.txt", "media/Platformer/img/Environment/Tileset2.png"]
                     self.level.setup_level(self.player, arrPath)
                     self.loadProgress()
                     # InfoLogger.info(str(savedValues))
