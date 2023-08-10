@@ -254,7 +254,7 @@ class Parser:
 		self.terrainLayer[2].loadlayer(4)
 
 class Tile:
-	def __init__(self, assetMngr, pos, isVisible, isCol, interaction, image, rotation, scale):
+	def __init__(self, assetMngr, pos, isVisible, isCol, interaction, image, rotation, scale= 1):
 		self.display_surface = pygame.display.get_surface()
 		self.assetMngr = assetMngr
 		self.isVisible = isVisible

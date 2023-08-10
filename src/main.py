@@ -7,6 +7,7 @@ from assetManager import *
 
 from player import *
 from level import *
+from Enemy import *
 
 class Game():
     def __init__(self):
@@ -35,8 +36,8 @@ class Game():
         self.speed = 7
         self.dt = 0                 # delta time in seconds since last frame
         self.isLevelInit = False
-        # self.currentLevel = config.LevelEnum.Strategy.value
-        self.currentLevel = 0
+        self.currentLevel = config.LevelEnum.Platformer.value
+        # self.currentLevel = 0
 
         self.manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
@@ -336,6 +337,15 @@ class Game():
                     self.level.setup_level(self.player, self.currentLevel, arrPath)
                     # self.loadProgress()
                     # InfoLogger.info(str(savedValues))
+
+                    l_enemy_spawner = Spawner(LiteEnemy(self.level.tiles, self.publisher, self.currentLevel))
+                    r_enemy_spawner = Spawner(RegularEnemy(self.level.tiles, self.publisher, self.currentLevel))
+                    h_enemy_spawner = Spawner(HeavyEnemy(self.level.tiles, self.publisher, self.currentLevel))
+
+                    self.l_enemy = l_enemy_spawner.spawnAnEnemy((300, 300))
+                    self.r_enemy = r_enemy_spawner.spawnAnEnemy((400, 300))
+                    self.h_enemy = h_enemy_spawner.spawnAnEnemy((500, 300))
+
                     self.isLevelInit = True
 
                 if (self.isLevelInit == True):
@@ -376,6 +386,11 @@ class Game():
 
     def render(self):
         self.manager.draw_ui(self.screen)
+
+        self.l_enemy.draw()
+        self.r_enemy.draw()
+        self.h_enemy.draw()
+
         pygame.display.update()
 
     def run(self):

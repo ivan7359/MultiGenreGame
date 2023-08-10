@@ -13,6 +13,9 @@ class Player(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect(center = (WIDTH / 2, HEIGHT / 2))
 		self.coord_offset = pygame.math.Vector2()
 
+		self.health = 100
+		self.damage = 34
+
 		# player movement 
 		self.direction = pygame.math.Vector2()
 		self.speed = 12

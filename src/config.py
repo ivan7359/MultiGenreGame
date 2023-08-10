@@ -24,7 +24,7 @@ class TileEnum(enum.Enum):
     Coin = 3
     Portal = 4
 
-state = UIEnum.Main_menu.value
+state = UIEnum.Game.value
 prev_state = state
 
 savedValues = {}
