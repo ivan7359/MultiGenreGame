@@ -381,6 +381,7 @@ class Game():
         self.screen.fill("black")
         self.changeUIState()
         self.manager.update(self.dt)
+        print(self.clock.get_fps())
 
     def render(self):
         self.manager.draw_ui(self.screen)

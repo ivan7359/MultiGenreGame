@@ -235,7 +235,7 @@ class Parser:
 			self.__getTilesFromTileset(path[1], (6, 18), 2)
 
 		if (currentLevel == LevelEnum.Platformer.value):
-			self.__getTilesFromTileset(path[1], (8, 18), 1)
+			self.__getTilesFromTileset(path[1], (8, 16), 1)
 
 		# creating map from the file
 		self.terrainLayer[0].loadlayer()
@@ -252,12 +252,13 @@ class Parser:
 		self.terrainLayer[2].loadlayer(4)
 
 class Tile:
-	def __init__(self, assetMngr, pos, isVisible, isCol, interaction, image, rotation, scale= 1):
+	def __init__(self, assetMngr, pos, objType, image, rotation = 0, scale = 1):
+		self.id = 0
 		self.display_surface = pygame.display.get_surface()
 		self.assetMngr = assetMngr
-		self.isVisible = isVisible
-		self.isCol = isCol
-		self.interaction = interaction
+		self.isVisible = True
+		self.objType = objType
+		self.pos = pos
 
 		# self.image = self.assetMngr.getImage(img_path)
 		self.image = image
@@ -265,14 +266,19 @@ class Tile:
 		self.image = pygame.transform.scale(self.image, (self.image.get_width() / scale, self.image.get_height() / scale))
 		self.rect = self.image.get_rect(topleft = pos)
 
+	def setVisible(self, visible):
+		self.isVisible = visible
+
 	def draw(self):
-		self.display_surface.blit(self.image, self.rect.topleft)
+		if(self.isVisible == True):
+			self.display_surface.blit(self.image, self.rect.topleft)
 
 class TilesObjectPool:
 	def __init__(self):
 		self.arr = []
 
 	def append(self, obj):
+		obj.id = self.arr
 		self.arr.append(obj)
 
 	def getArr(self):
@@ -281,25 +287,6 @@ class TilesObjectPool:
 	def draw(self):
 		for obj in self.arr:
 			obj.draw()
-
-	def getOptionsArr(self, isVisible, isCol, interaction):
-		tmp = set()
-
-		if (isVisible == True):
-			for obj in self.arr:
-				if (obj.isVisible == True):
-					tmp.add(obj)
-
-		if (isCol == True):
-			for obj in self.arr:
-				if (obj.isCol == True):
-					tmp.add(obj)
-
-		for obj in self.arr:
-			if (obj.interaction == interaction):
-				tmp.add(obj)
-
-		return tmp
 
 class Level:
 	def __init__(self, assetMngr, isMiniMap= False):
@@ -357,7 +344,7 @@ class Level:
 					y = (row_index * TILE_SIZE) / scale
 
 				if col[0] in layer.numbers and col[0] != '0':
-					self.tiles.append(Tile(self.assetMngr, (x, y), True, True, TileEnum._None.value, layer.tilesDict[col[0]], col[1], scale))
+					self.tiles.append(Tile(self.assetMngr, (x, y), TileEnum._None.value, layer.tilesDict[col[0]], col[1], scale))
 				
 				if col[0] == '18324':
 					self.player.setPos(x, y)
@@ -370,7 +357,7 @@ class Level:
 				y = row_index * TILE_SIZE
 				for currWall in layer.tilesDict.keys():
 					if col == str(currWall):
-						self.tiles.append(Tile(self.assetMngr, (x,y), True, True, TileEnum._None.value, layer.tilesDict[col[0]], 0))
+						self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum._None.value, layer.tilesDict.get(col), 0))
 					if col == '18324':
 						self.player.setPos(x, y)
 					
@@ -380,10 +367,14 @@ class Level:
 				x = col_index * TILE_SIZE
 				y = row_index * TILE_SIZE
 				for currWall in layer.tilesDict.keys():
-					if col == str(currWall):
-						self.tiles.append(Tile(self.assetMngr, (x,y), True, True, TileEnum._None.value, layer.tilesDict[col[0]], 0))
-					if col == '18324':
-						self.player.setPos(x, y)
+					# if col == '18324':
+					# 	self.player.setPos(x, y)
+					if col == '128':
+						# self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum.Coin.value, layer.tilesDict.get(col), 0))
+						self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum.Coin.value, layer.tilesDict.get(col)))
+					if col == str(currWall) and col != '128':
+						# self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum._None.value, layer.tilesDict.get(col), 0))
+						self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum._None.value, layer.tilesDict.get(col)))
 
 	def getGroups(self):
 		return [self.visible_sprites, self.active_sprites]
@@ -416,6 +407,19 @@ class Camera:
 		self.camera_rect = pygame.Rect(cam_left, cam_top, cam_width, cam_height)
 		self.prev_camera_rect = pygame.Rect(cam_left, cam_top, cam_width, cam_height)
 
+	def horizontal_collisions(self, player, sprite):
+		if player.rect.colliderect(sprite.rect):
+			if(sprite.objType == TileEnum._None.value):
+				if player.direction.x < 0: 
+					player.rect.left = sprite.rect.right
+				if player.direction.x > 0: 
+					player.rect.right = sprite.rect.left
+
+			if(sprite.objType == TileEnum.Coin.value):
+				print(sprite.pos)
+				# print(sprite.pos)
+				# print('The player collided with a coin!')
+
 	def followPlayer(self, dt, player, scale, isMiniMap= False):
 		# get the player offset 
 		# self.offset.x = player.rect.centerx - self.half_w
@@ -442,6 +446,7 @@ class Camera:
 			if (isMiniMap == False):
 				if(player.isMoving[0] == True):
 					sprite.rect.left -= player.direction.x * player.speed * dt
+					self.horizontal_collisions(player, sprite)
 				
 				if(player.isMoving[1] == True):
 					sprite.rect.top -= player.direction.y * player.speed * dt
