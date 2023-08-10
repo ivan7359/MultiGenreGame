@@ -2,11 +2,10 @@ import pygame
 from config import *
 
 class Entity:
-    def __init__(self, objSprites, publisher, state, pos= (0, 0)):
+    def __init__(self, objSprites, publisher, pos= (0, 0)):
         self.display_surface = pygame.display.get_surface()
         self.objSprites = objSprites
         self.publisher = publisher
-        self.state = state
 
         self.life = True
         # self.health = 100

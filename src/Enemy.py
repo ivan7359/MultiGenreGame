@@ -3,18 +3,18 @@ from config import *
 from Entity import *
 
 class LiteEnemy(Entity):
-    def __init__(self, objSprites, publisher, state, pos= (0, 0)):
-        super().__init__(objSprites, publisher, state, pos)
+    def __init__(self, objSprites, publisher, pos= (0, 0)):
+        super().__init__(objSprites, publisher, pos)
         
         self.health = 10
         self.damage = 20
 
     def clone(self, pos):
-        return LiteEnemy(self.objSprites, self.publisher, self.state, pos)
+        return LiteEnemy(self.objSprites, self.publisher, pos)
 
 class RegularEnemy(Entity):
-    def __init__(self, objSprites, publisher, state, pos= (0, 0)):
-        super().__init__(objSprites, publisher, state, pos)
+    def __init__(self, objSprites, publisher, pos= (0, 0)):
+        super().__init__(objSprites, publisher, pos)
 
         self.image.fill('yellow')
 
@@ -22,11 +22,11 @@ class RegularEnemy(Entity):
         self.damage = 34
 
     def clone(self, pos):
-        return RegularEnemy(self.objSprites, self.publisher, self.state, pos)
+        return RegularEnemy(self.objSprites, self.publisher, pos)
 
 class HeavyEnemy(Entity):
-    def __init__(self, objSprites, publisher, state, pos= (0, 0)):
-        super().__init__(objSprites, publisher, state, pos)
+    def __init__(self, objSprites, publisher, pos= (0, 0)):
+        super().__init__(objSprites, publisher, pos)
 
         self.image.fill('red')
 
@@ -34,7 +34,7 @@ class HeavyEnemy(Entity):
         self.damage = 90
 
     def clone(self, pos):
-        return HeavyEnemy(self.objSprites, self.publisher, self.state, pos)
+        return HeavyEnemy(self.objSprites, self.publisher, pos)
     
 ########################################################################
 

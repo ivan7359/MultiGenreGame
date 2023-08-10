@@ -2,12 +2,11 @@ import pygame
 from config import *
 
 class Player(pygame.sprite.Sprite):
-	def __init__(self, objSprites, publisher, state):
+	def __init__(self, objSprites, publisher):
 		# super().__init__(groups)
 		self.display_surface = pygame.display.get_surface()
 		self.objSprites = objSprites
 		self.publisher = publisher
-		self.state = state
 		self.image = pygame.Surface((TILE_SIZE // 2,TILE_SIZE))
 		self.image.fill('green')
 		self.rect = self.image.get_rect(center = (WIDTH / 2, HEIGHT / 2))
@@ -33,7 +32,7 @@ class Player(pygame.sprite.Sprite):
 	def verticalMovement(self, direction, isMoving):
 		self.isMoving[1] = isMoving
 
-		if(self.state == LevelEnum.Platformer.value):
+		if(currentLevel == LevelEnum.Platformer.value):
 			if(self.on_floor == True):
 				self.publisher.notify(EventsEnum.jump.value)
 				self.direction.y = -self.jump_speed
@@ -43,7 +42,7 @@ class Player(pygame.sprite.Sprite):
 				self.direction.y = -self.jump_speed
 				self.countJump = self.countJump - 1
 		
-		if(self.state == LevelEnum.Strategy.value):
+		if(currentLevel == LevelEnum.Strategy.value):
 			self.direction.y = direction
 
 	def setPos(self, x, y):
@@ -85,7 +84,7 @@ class Player(pygame.sprite.Sprite):
 			# self.rect.x += self.direction.x * self.speed * dt
 			# self.horizontal_collisions()
 		
-		if(self.state == LevelEnum.Platformer.value):
+		if(currentLevel == LevelEnum.Platformer.value):
 			if(self.on_floor == False):
 				# self.direction.y += self.gravity
 				# self.rect.y += self.direction.y * dt
@@ -93,7 +92,7 @@ class Player(pygame.sprite.Sprite):
 		
 				# self.vertical_collisions()
 
-		if(self.state == LevelEnum.Strategy.value):
+		if(currentLevel == LevelEnum.Strategy.value):
 			# if(self.isMoving[1] == True):
 			# 	self.rect.y += self.direction.y * self.speed * dt
 			pass

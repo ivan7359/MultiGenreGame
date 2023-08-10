@@ -24,8 +24,7 @@ class VerticalMovement(Command):
         self.actor.verticalMovement(self.direction, isMoving)
 
 class InputHandler:
-    def __init__(self, player, publisher, state):
-        self.state = state
+    def __init__(self, player, publisher):
         self.publisher = publisher
 
         self.W_command = VerticalMovement(player, -1)
@@ -35,7 +34,7 @@ class InputHandler:
 
     def handleInput(self, event, controls):
         if event.type == pygame.KEYDOWN:
-            if(self.state == config.LevelEnum.Platformer.value):
+            if(config.currentLevel == config.LevelEnum.Platformer.value):
                 if event.key == pygame.key.key_code(controls['jump']):
                     self.W_command.execute(True)
 
@@ -48,7 +47,7 @@ class InputHandler:
                 if event.key == pygame.key.key_code(controls['right']):
                     self.D_command.execute(True)
 
-            if(self.state == config.LevelEnum.Strategy.value):
+            if(config.currentLevel == config.LevelEnum.Strategy.value):
                 if event.key == pygame.key.key_code(controls['front']):
                     self.W_command.execute(True)
 
@@ -62,10 +61,10 @@ class InputHandler:
                     self.D_command.execute(True)
 
             if event.key == pygame.K_ESCAPE:
-                self.state = config.UIEnum.Pause.value
+                config.currentLevel = config.UIEnum.Pause.value
 
         if event.type == pygame.KEYUP:
-            if(self.state == config.LevelEnum.Platformer.value):
+            if(config.currentLevel == config.LevelEnum.Platformer.value):
                 if event.key == pygame.key.key_code(controls['jump']):
                     self.W_command.execute(False)
 
@@ -78,7 +77,7 @@ class InputHandler:
                 if event.key == pygame.key.key_code(controls['right']):
                     self.D_command.execute(False)
 
-            if(self.state == config.LevelEnum.Strategy.value):
+            if(config.currentLevel == config.LevelEnum.Strategy.value):
                 if event.key == pygame.key.key_code(controls['front']):
                     self.W_command.execute(False)
 
