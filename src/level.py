@@ -9,9 +9,8 @@ P180 = M90 * 2
 ID_OFFSET = 986
 
 class Layer:
-	def __init__(self, path, state):
+	def __init__(self, path):
 		self.path = path
-		self.state = state
 
 		self.map = []
 		self.numbers = set()
@@ -38,10 +37,10 @@ class Layer:
 			return [id, 0]
 
 	def loadlayer(self, desirable_layer= 0):
-		if (self.state == LevelEnum.Strategy.value):
+		if (currentLevel == LevelEnum.Strategy.value):
 			self.loadStrategylayer(desirable_layer)
 		
-		if (self.state == LevelEnum.Shooter.value or  self.state == LevelEnum.Platformer.value):
+		if (currentLevel == LevelEnum.Shooter.value or  currentLevel == LevelEnum.Platformer.value):
 			self.loadOtherLayer()
 
 	def loadStrategylayer(self, desirable_layer):
@@ -222,16 +221,15 @@ class Parser:
 		# for i in self.terrainLayer[0].tilesDict:
 		# 	InfoLogger.info(str(i) + " " + str(self.terrainLayer[0].tilesDict[i]))
 
-	def mainParcer(self, path, currentLevel):
-
+	def mainParcer(self, path):
 		if path[0].split('.')[1] == 'txt':
 			InfoLogger.info("Loading .txt map")
-			self.parceTXT(path, currentLevel)
+			self.parceTXT(path)
 		else:
 			InfoLogger.info("Loading .tmx map")
 			self.parceTMX(path[0])
 
-	def parceTXT(self, path, currentLevel):
+	def parceTXT(self, path):
 		# creating [id] = [image] dictionary
 		if (currentLevel == LevelEnum.Shooter.value):
 			self.__getTilesFromTileset(path[1], (6, 18), 2)
@@ -254,7 +252,7 @@ class Parser:
 		self.terrainLayer[2].loadlayer(4)
 
 class Tile:
-	def __init__(self, assetMngr, pos, isVisible, isCol, interaction, image, rotation, scale):
+	def __init__(self, assetMngr, pos, isVisible, isCol, interaction, image, rotation, scale= 1):
 		self.display_surface = pygame.display.get_surface()
 		self.assetMngr = assetMngr
 		self.isVisible = isVisible
@@ -270,7 +268,7 @@ class Tile:
 	def draw(self):
 		self.display_surface.blit(self.image, self.rect.topleft)
 
-class ObjectPool:
+class TilesObjectPool:
 	def __init__(self):
 		self.arr = []
 
@@ -310,17 +308,17 @@ class Level:
 		self.isMiniMap = isMiniMap
 
 		self.scale = 16
-		self.tiles = ObjectPool()
+		self.tiles = TilesObjectPool()
 		self.camera = Camera(self.tiles)
 
-	def setup_level(self, player, currentLevel, path):
+	def setup_level(self, player, path):
 		self.player = player
 
 		if (currentLevel == LevelEnum.Strategy.value):
-			self.terrainLayer = [Layer(path[0], currentLevel), Layer(path[0], currentLevel), Layer(path[0], currentLevel)]
+			self.terrainLayer = [Layer(path[0]), Layer(path[0]), Layer(path[0])]
 
 			self.parser = Parser(self.terrainLayer, self.assetMngr)
-			self.parser.mainParcer(path, currentLevel)
+			self.parser.mainParcer(path)
 				
 			if (self.isMiniMap == True):
 				self.strategyLoader(self.terrainLayer[0], self.scale)
@@ -332,18 +330,18 @@ class Level:
 				self.strategyLoader(self.terrainLayer[2])
 
 		if (currentLevel == LevelEnum.Shooter.value):
-			self.terrainLayer = [Layer(path[0], currentLevel)]
+			self.terrainLayer = [Layer(path[0])]
 			
 			self.parser = Parser(self.terrainLayer, self.assetMngr)
-			self.parser.mainParcer(path, currentLevel)
+			self.parser.mainParcer(path)
 
 			self.shooterLoader(self.terrainLayer[0])
 
 		if (currentLevel == LevelEnum.Platformer.value):
-			self.terrainLayer = [Layer(path[0], currentLevel)]
+			self.terrainLayer = [Layer(path[0])]
 			
 			self.parser = Parser(self.terrainLayer, self.assetMngr)
-			self.parser.mainParcer(path, currentLevel)
+			self.parser.mainParcer(path)
 
 			self.platformerLoader(self.terrainLayer[0])
 

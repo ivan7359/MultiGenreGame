@@ -7,6 +7,7 @@ from assetManager import *
 
 from player import *
 from level import *
+from Enemy import *
 
 class Game():
     def __init__(self):
@@ -35,13 +36,13 @@ class Game():
         self.speed = 7
         self.dt = 0                 # delta time in seconds since last frame
         self.isLevelInit = False
-        # self.currentLevel = config.LevelEnum.Strategy.value
-        self.currentLevel = 0
-
+        
         self.manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
         self.createUIWidgets()
         # threading.Thread(target=self.playBgMusic).start()
+
+        self.enemies = EnemiesObjectPool()
 
     def loadProgress(self):
         with open("configs/savefile.txt", "r") as f:
@@ -172,37 +173,33 @@ class Game():
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             # Main_menu             
             if event.ui_element == self.mainMenuWidgets['play_button']:
-                config.state = config.UIEnum.Game.value
+                config.gameState = config.UIEnum.Game.value
 
             if event.ui_element == self.mainMenuWidgets['settings_button']:
-                config.prev_state = config.state
-                config.state = config.UIEnum.Settings.value
+                config.prev_gameState = config.gameState
+                config.gameState = config.UIEnum.Settings.value
 
             if event.ui_element == self.mainMenuWidgets['exit_button']:
                 self.running = False
 
             if event.ui_element == self.mainMenuWidgets['left_arrow_button']:
-                if (self.currentLevel == 0):
-                    self.currentLevel = 2
+                if (currentLevel == 0):
+                    currentLevel = 2
                 else:
-                    self.currentLevel -= 1
-
-                print(self.currentLevel)
+                    currentLevel -= 1
 
             if event.ui_element == self.mainMenuWidgets['right_arrow_button']:
-                if (self.currentLevel == 2):
-                    self.currentLevel = 0
+                if (currentLevel == 2):
+                    currentLevel = 0
                 else:
-                    self.currentLevel += 1
+                    currentLevel += 1
 
-                print(self.currentLevel)
-            
             # Settings
             if event.ui_element == self.settingsWidgets['info_settings_button']:
                 print('Button info was pressed!')
 
             if event.ui_element == self.settingsWidgets['Back_button']:
-                config.state = config.UIEnum.Main_menu.value
+                config.gameState = config.UIEnum.Main_menu.value
 
             if event.ui_element == self.settingsWidgets['OK_button']:
                 for widget in self.settingsControls:
@@ -212,19 +209,19 @@ class Game():
                 for widget in self.controls:
                     DebugLogger.debug(widget + ' ' + self.controls[widget])
 
-                config.state = config.UIEnum.Main_menu.value
-                config.state = config.prev_state
+                config.gameState = config.UIEnum.Main_menu.value
+                config.gameState = config.prev_gameState
             
             # Pause
             if event.ui_element == self.pauseWidgets['continue_button']:
-                config.state = config.UIEnum.Game.value
+                config.gameState = config.UIEnum.Game.value
 
             if event.ui_element == self.pauseWidgets['settings_pause_button']:
-                config.prev_state = config.state
-                config.state = config.UIEnum.Settings.value
+                config.prev_gameState = config.gameState
+                config.gameState = config.UIEnum.Settings.value
 
             if event.ui_element == self.pauseWidgets['exit_pause_button']:
-                config.state = config.UIEnum.Main_menu.value
+                config.gameState = config.UIEnum.Main_menu.value
 
         if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
             if event.ui_element == self.settingsWidgets['Sound_slider']:
@@ -264,13 +261,13 @@ class Game():
             self.UIEvents(event)
             self.manager.process_events(event)
 
-            if(config.state == config.UIEnum.Game.value):
+            if(config.gameState == config.UIEnum.Game.value):
                 if(self.isLevelInit == True):
-                    self.inputHandler = InputHandler(self.player, self.publisher, self.currentLevel)
+                    self.inputHandler = InputHandler(self.player, self.publisher)
                     self.inputHandler.handleInput(event, self.controls)
 
     def changeUIState(self):
-        if (config.state == config.UIEnum.Main_menu.value):
+        if (config.gameState == config.UIEnum.Main_menu.value):
 
             for widget in self.mainMenuWidgets:
                 self.mainMenuWidgets[widget].show()
@@ -284,7 +281,7 @@ class Game():
             for widget in self.pauseWidgets:
                 self.pauseWidgets[widget].hide()
 
-        if (config.state == config.UIEnum.Game.value):
+        if (config.gameState == config.UIEnum.Game.value):
             for widget in self.mainMenuWidgets:
                 self.mainMenuWidgets[widget].hide()
 
@@ -297,17 +294,17 @@ class Game():
             for widget in self.pauseWidgets:
                 self.pauseWidgets[widget].hide()
 
-            if (self.currentLevel == LevelEnum.Strategy.value):
+            if (currentLevel == LevelEnum.Strategy.value):
                 if(self.isLevelInit == False):
                     
                     self.level = Level(self.assetMngr)
                     self.miniMap = Level(self.assetMngr, True)
 
-                    self.player = Player(self.level.tiles, self.publisher, self.currentLevel)
+                    self.player = Player(self.level.tiles, self.publisher)
                     arrPath = ["maps/strategy.tmx"]
                     
-                    self.level.setup_level(self.player, self.currentLevel, arrPath)
-                    self.miniMap.setup_level(self.player, self.currentLevel, arrPath)
+                    self.level.setup_level(self.player, arrPath)
+                    self.miniMap.setup_level(self.player, arrPath)
                     
                     self.isLevelInit = True
 
@@ -315,12 +312,12 @@ class Game():
                     self.level.update(self.dt)
                     self.miniMap.update(self.dt)
 
-            if (self.currentLevel == LevelEnum.Shooter.value):
+            if (currentLevel == LevelEnum.Shooter.value):
                 if(self.isLevelInit == False):
                     self.level = Level(self.assetMngr)
-                    self.player = Player(self.level.tiles, self.publisher, self.currentLevel)
+                    self.player = Player(self.level.tiles, self.publisher)
                     arrPath = ["maps/shooter.txt", "media/Shooter/img/WallTiles.png"]
-                    self.level.setup_level(self.player, self.currentLevel, arrPath)
+                    self.level.setup_level(self.player, arrPath)
                     #self.loadProgress()
                     #InfoLogger.info(str(savedValues))
                     self.isLevelInit = True
@@ -328,20 +325,31 @@ class Game():
                 if (self.isLevelInit == True):
                     self.level.update(self.dt)
 
-            if (self.currentLevel == LevelEnum.Platformer.value):
+            if (currentLevel == LevelEnum.Platformer.value):
                 if(self.isLevelInit == False):
                     self.level = Level(self.assetMngr)
-                    self.player = Player(self.level.tiles, self.publisher, self.currentLevel)
+                    self.player = Player(self.level.tiles, self.publisher)
                     arrPath = ["maps/levelPlatformer.txt", "media/Platformer/img/Environment/Tileset2.png"]
-                    self.level.setup_level(self.player, self.currentLevel, arrPath)
+                    self.level.setup_level(self.player, arrPath)
                     # self.loadProgress()
                     # InfoLogger.info(str(savedValues))
+
+                    # Creating spawners of an enemies
+                    l_enemy_spawner = Spawner(LiteEnemy(self.level.tiles, self.publisher), (300, 300))
+                    r_enemy_spawner = Spawner(RegularEnemy(self.level.tiles, self.publisher), (400, 300))
+                    h_enemy_spawner = Spawner(HeavyEnemy(self.level.tiles, self.publisher), (500, 300))
+
+                    # Adding enemies into the level
+                    # self.enemies.append(l_enemy_spawner.spawnAnEnemy())
+                    # self.enemies.append(r_enemy_spawner.spawnAnEnemy())
+                    # self.enemies.append(h_enemy_spawner.spawnAnEnemy())
+
                     self.isLevelInit = True
 
                 if (self.isLevelInit == True):
                     self.level.update(self.dt)
 
-        if (config.state == config.UIEnum.Pause.value):
+        if (config.gameState == config.UIEnum.Pause.value):
             for widget in self.mainMenuWidgets:
                 self.mainMenuWidgets[widget].hide()
 
@@ -354,7 +362,7 @@ class Game():
             for widget in self.pauseWidgets:
                 self.pauseWidgets[widget].show()
 
-        if (config.state == config.UIEnum.Settings.value):
+        if (config.gameState == config.UIEnum.Settings.value):
             self.screen.fill("black")
 
             for widget in self.mainMenuWidgets:
@@ -376,6 +384,9 @@ class Game():
 
     def render(self):
         self.manager.draw_ui(self.screen)
+
+        self.enemies.drawAllEnemies()
+
         pygame.display.update()
 
     def run(self):
