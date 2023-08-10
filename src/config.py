@@ -11,6 +11,7 @@ class EventsEnum(enum.Enum):
     movement = 0
     jump = 1
     achievement = 2
+    collectCoin = 3
 
 class LevelEnum(enum.Enum):
     Strategy = 0

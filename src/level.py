@@ -278,7 +278,7 @@ class TilesObjectPool:
 		self.arr = []
 
 	def append(self, obj):
-		obj.id = self.arr
+		obj.id = len(self.arr)
 		self.arr.append(obj)
 
 	def getArr(self):
@@ -289,14 +289,14 @@ class TilesObjectPool:
 			obj.draw()
 
 class Level:
-	def __init__(self, assetMngr, isMiniMap= False):
+	def __init__(self, assetMngr, publisher, isMiniMap= False):
 		self.display_surface = pygame.display.get_surface()
 		self.assetMngr = assetMngr
 		self.isMiniMap = isMiniMap
 
 		self.scale = 16
 		self.tiles = TilesObjectPool()
-		self.camera = Camera(self.tiles)
+		self.camera = Camera(self.tiles, publisher)
 
 	def setup_level(self, player, path):
 		self.player = player
@@ -366,15 +366,13 @@ class Level:
 			for col_index, col in enumerate(row):
 				x = col_index * TILE_SIZE
 				y = row_index * TILE_SIZE
-				for currWall in layer.tilesDict.keys():
-					# if col == '18324':
-					# 	self.player.setPos(x, y)
-					if col == '128':
-						# self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum.Coin.value, layer.tilesDict.get(col), 0))
-						self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum.Coin.value, layer.tilesDict.get(col)))
-					if col == str(currWall) and col != '128':
-						# self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum._None.value, layer.tilesDict.get(col), 0))
-						self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum._None.value, layer.tilesDict.get(col)))
+
+				if (col in layer.tilesDict.keys()) and col == '128':
+					self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum.Coin.value, layer.tilesDict.get(col)))
+					InfoLogger.info("Coin at the position: " + str(x) + ' ' + str(y))
+
+				if (col in layer.tilesDict.keys()) and col != '128':
+					self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum._None.value, layer.tilesDict.get(col)))
 
 	def getGroups(self):
 		return [self.visible_sprites, self.active_sprites]
@@ -388,11 +386,12 @@ class Level:
 		self.player.draw()
 		
 class Camera:
-	def __init__(self, tiles):
+	def __init__(self, tiles, publisher):
 		self.display_surface = pygame.display.get_surface()
 		self.offset = pygame.math.Vector2(100, 300)
 		self.tiles = tiles
 		self.offset_pos = pygame.math.Vector2()
+		self.publisher = publisher
 
 		# center camera setup 
 		# self.half_w = self.display_surface.get_size()[0] // 2
@@ -417,8 +416,12 @@ class Camera:
 
 			if(sprite.objType == TileEnum.Coin.value):
 				print(sprite.pos)
-				# print(sprite.pos)
-				# print('The player collided with a coin!')
+				self.tiles.getArr().remove(sprite)
+				tmp = int(savedValues["total_score"]) + 1
+				savedValues['total_score'] = str(tmp)
+				self.publisher.notify(EventsEnum.collectCoin.value)
+				print(savedValues["total_score"])
+
 
 	def followPlayer(self, dt, player, scale, isMiniMap= False):
 		# get the player offset 

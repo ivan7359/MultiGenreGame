@@ -26,7 +26,7 @@ class Game():
 # Load all resources
         self.assetMngr = AssetManager('media')
         self.assetMngr.loadImages()
-        # self.assetMngr.loadSounds()
+        self.assetMngr.loadSounds()
         # self.assetMngr.loadFonts()
 
         self.publisher = Subject()
@@ -327,11 +327,11 @@ class Game():
 
             if (currentLevel == LevelEnum.Platformer.value):
                 if(self.isLevelInit == False):
-                    self.level = Level(self.assetMngr)
+                    self.level = Level(self.assetMngr, self.publisher)
                     self.player = Player(self.level.tiles, self.publisher)
                     arrPath = ["maps/levelPlatformer.txt", "media/Platformer/img/Environment/Tileset2.png"]
                     self.level.setup_level(self.player, arrPath)
-                    # self.loadProgress()
+                    self.loadProgress()
                     # InfoLogger.info(str(savedValues))
 
                     # Creating spawners of an enemies
@@ -381,7 +381,7 @@ class Game():
         self.screen.fill("black")
         self.changeUIState()
         self.manager.update(self.dt)
-        print(self.clock.get_fps())
+        # print(self.clock.get_fps())
 
     def render(self):
         self.manager.draw_ui(self.screen)

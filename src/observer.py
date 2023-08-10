@@ -15,6 +15,9 @@ class Audio(Observer):
         if (event == EventsEnum.jump.value):
             self.__assetManager.getSound('Jump').play()
 
+        if (event == EventsEnum.collectCoin.value):
+            self.__assetManager.getSound('Coin_1').play()
+
 class Subject:
     def __init__(self):
         self.__observers = []
