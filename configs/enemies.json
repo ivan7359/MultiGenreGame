@@ -1,0 +1,19 @@
+{
+    "LiteEnemy": {
+        "texture": "",
+        "health": 10,
+        "damage": 20
+    },
+
+    "RegularEnemy": {
+        "texture": "",
+        "health": 100,
+        "damage": 34
+    },
+
+    "HeavyEnemy": {
+        "texture": "",
+        "health": 170,
+        "damage": 90
+    }
+}
