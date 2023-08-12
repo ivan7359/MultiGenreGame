@@ -20,7 +20,7 @@ class Game():
         
         self.settings = {}
         self.controls = {}
-        self.parceJSON()
+        self.parceSettingsJSON()
         InfoLogger.info("Game was started")
 
 # Load all resources
@@ -63,15 +63,32 @@ class Game():
         self.backgroundMusic = self.assetMngr.getSound('Main_menu')
         # self.backgroundMusic.play(-1)
 
-    def parceJSON(self):
+    def parceSettingsJSON(self):
         self.settings = json.load(open("configs/settings.json", 'r'))
         
         for i in self.settings['controls']:
             self.controls[i] = self.settings['controls'][i]
 
-        InfoLogger.info("------ SETTINGS ------")
+        DebugLogger.debug("------ SETTINGS ------")
         for i in self.settings:
             DebugLogger.debug(i + ' = ' + str(self.settings[i]))
+
+    def parseEnemiesJSON(self):
+        self.objects = json.load(open("configs/enemies.json", 'r'))
+        self.enemiesConfig = {}
+
+        for object in self.objects:
+            self.local_enemy = {}
+            
+            for metric in self.objects[object]:
+                self.local_enemy[metric] = self.objects[object][metric]
+
+            self.enemiesConfig[object] = self.local_enemy
+
+        DebugLogger.debug("------ ENEMIES ------")
+        for i in self.enemiesConfig:
+            DebugLogger.debug(str(i) + ' ' + str(self.enemiesConfig[i]))
+
 
     def createUIWidgets(self):
         self.CurrPercent = 70
@@ -334,10 +351,12 @@ class Game():
                     self.loadProgress()
                     # InfoLogger.info(str(savedValues))
 
+                    self.parseEnemiesJSON()
+
                     # Creating spawners of an enemies
-                    l_enemy_spawner = Spawner(LiteEnemy(self.level.tiles, self.publisher), (300, 300))
-                    r_enemy_spawner = Spawner(RegularEnemy(self.level.tiles, self.publisher), (400, 300))
-                    h_enemy_spawner = Spawner(HeavyEnemy(self.level.tiles, self.publisher), (500, 300))
+                    l_enemy_spawner = Spawner(LiteEnemy(self.level.tiles, self.publisher, self.enemiesConfig['LiteEnemy']), (300, 300))
+                    r_enemy_spawner = Spawner(RegularEnemy(self.level.tiles, self.publisher, self.enemiesConfig['RegularEnemy']), (400, 300))
+                    h_enemy_spawner = Spawner(HeavyEnemy(self.level.tiles, self.publisher, self.enemiesConfig['HeavyEnemy']), (500, 300))
 
                     # Adding enemies into the level
                     # self.enemies.append(l_enemy_spawner.spawnAnEnemy())
