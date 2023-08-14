@@ -9,14 +9,15 @@ class Audio(Observer):
         self.__assetManager = assetManager
 
     def onNotify(self, event):
-        if (event == EventsEnum.movement.value):
-            self.__assetManager.getSound('Running').play()
+        pass
+        # if (event == EventsEnum.movement.value):
+        #     self.__assetManager.getSound('Running').play()
 
-        if (event == EventsEnum.jump.value):
-            self.__assetManager.getSound('Jump').play()
+        # if (event == EventsEnum.jump.value):
+        #     self.__assetManager.getSound('Jump').play()
 
-        if (event == EventsEnum.collectCoin.value):
-            self.__assetManager.getSound('Coin_1').play()
+        # if (event == EventsEnum.collectCoin.value):
+        #     self.__assetManager.getSound('Coin_1').play()
 
 class Subject:
     def __init__(self):

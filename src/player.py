@@ -31,16 +31,16 @@ class Player(pygame.sprite.Sprite):
 
 	def verticalMovement(self, direction, isMoving):
 		self.isMoving[1] = isMoving
+		self.direction.y = direction
 
 		if(currentLevel == LevelEnum.Platformer.value):
 			if(self.on_floor == True):
 				self.publisher.notify(EventsEnum.jump.value)
-				self.direction.y = -self.jump_speed
-				self.countJump = self.countJump - 1
+				# self.countJump = self.countJump - 1
 			
-			if(self.on_floor == False and self.countJump > 0):
-				self.direction.y = -self.jump_speed
-				self.countJump = self.countJump - 1
+			# if(self.on_floor == False and self.countJump > 0):
+			# 	# self.direction.y = -self.jump_speed
+			# 	self.countJump = self.countJump - 1
 		
 		if(currentLevel == LevelEnum.Strategy.value):
 			self.direction.y = direction
@@ -49,48 +49,71 @@ class Player(pygame.sprite.Sprite):
 		self.coord_offset.x = x
 		self.coord_offset.y = y
 
-	def horizontal_collisions(self):
-		for sprite in self.collision_sprites.sprites():
+	def collision(self, position):
+		for sprite in self.world.getArr():
 			if sprite.rect.colliderect(self.rect):
-				if self.direction.x < 0: 
-					self.rect.left = sprite.rect.right
-				if self.direction.x > 0: 
-					self.rect.right = sprite.rect.left
 
-	def vertical_collisions(self):
-		for sprite in self.collision_sprites.sprites():
-			if sprite.rect.colliderect(self.rect):
-				if self.direction.y > 0:
-					self.rect.bottom = sprite.rect.top
-					self.direction.y = 0
-					self.on_floor = True
-					self.countJump = 2
-				if self.direction.y < 0:
-					self.rect.top = sprite.rect.bottom
-					self.direction.y = 0
+				#Horizont
+				if position =='x':
+					if self.direction.x > 0: 
+						self.rect.right = sprite.rect.left
+						print("pravo")
+					if self.direction.x < 0: 
+						self.rect.left = sprite.rect.right
+						print("levo")
 
-		if self.on_floor and self.direction.y != 0:
-			self.on_floor = False
+				#Vertical
+				if position =='y':
+					if self.direction.y > 0:
+						self.rect.bottom = sprite.rect.top
+						self.direction.y = 0
+						# (print("niz"))
+					if self.direction.y < 0:
+						self.rect.top = sprite.rect.bottom
+						self.direction.y = 0
+						print("verx")
+
+	def move(self, dt):
+		self.on_floor = False
+		# horizontal movement
+		if(self.isMoving[0] == True):
+			self.rect.x += self.direction.x * self.speed * dt
+			self.collision('x')
+
+		# vertical movement
+		if(self.isMoving[1] == True):
+			self.on_floor = True
+			self.rect.y += self.direction.y * self.jump_speed * dt
+			self.collision('y')
+			print("rect.y: ", self.rect.y)
 
 	def update(self, dt):
-		if self.movement_sound_timer > 0:
-			self.movement_sound_timer -= 1
+		# if self.movement_sound_timer > 0:
+		# 	self.movement_sound_timer -= 1
 	    
-		if(self.isMoving[0] == True):
-			if self.movement_sound_timer == 0 and self.on_floor == True:
-				self.movement_sound_timer = SOUND_PLAYING_DELAY
-				self.publisher.notify(EventsEnum.movement.value)
+		# if(self.isMoving[0] == True):
+		# 	if self.movement_sound_timer == 0 and self.on_floor == True:
+		# 		self.movement_sound_timer = SOUND_PLAYING_DELAY
+		# 		self.publisher.notify(EventsEnum.movement.value)
 	
 			# self.rect.x += self.direction.x * self.speed * dt
 			# self.horizontal_collisions()
 		
 		if(currentLevel == LevelEnum.Platformer.value):
-			if(self.on_floor == False):
-				# self.direction.y += self.gravity
-				# self.rect.y += self.direction.y * dt
-				pass
-		
-				# self.vertical_collisions()
+			# Если герой не на земле
+			if(self.on_floor != True and self.isMoving[1] == False):
+				self.direction.y += self.gravity
+				self.rect.y += self.direction.y * dt
+				self.on_floor = True # Позволяет всегда проверять что герой не прилип к земле
+				if(self.isMoving[1] != True):
+					self.collision('y')
+
+			# self.apply_gravity(dt)
+			self.move(dt)
+			# self.checkOnFloor()
+		# self.horizontal_movement_collision()
+		# self.get_player_on_ground()
+		# self.vertical_movement_collision(dt)
 
 		if(currentLevel == LevelEnum.Strategy.value):
 			# if(self.isMoving[1] == True):

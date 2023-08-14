@@ -71,8 +71,8 @@ class AssetManager():
         for i in self.__fonts:
             DebugLogger.debug(i + ' = ' + str(self.__fonts[i]))
 
-    def getSound(self, sound):
-        return self.__sounds[sound]
+    # def getSound(self, sound):
+    #     return self.__sounds[sound]
     
     def getImage(self, img):
         return self.__imgs[img]

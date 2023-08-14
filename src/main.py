@@ -26,7 +26,7 @@ class Game():
 # Load all resources
         self.assetMngr = AssetManager('media')
         self.assetMngr.loadImages()
-        self.assetMngr.loadSounds()
+        # self.assetMngr.loadSounds()
         # self.assetMngr.loadFonts()
 
         self.publisher = Subject()
