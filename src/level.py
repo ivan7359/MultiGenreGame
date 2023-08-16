@@ -207,11 +207,11 @@ class Parser:
 		# for i in self.terrainLayer[2].tilesDict:
 		# 	InfoLogger.info(i + " " + self.terrainLayer[2].tilesDict[i])
 
-	def __getTilesFromTileset(self, layer, path, size, scale_factor= 1):
+	def __getTilesFromTileset(self, layer, path, size, id, scale_factor= 1):
 		tileset = pygame.image.load(path).convert()
 		tileset = pygame.transform.scale(tileset, (tileset.get_width() / scale_factor, tileset.get_height() / scale_factor))
 
-		id = 1
+		# id = 1
 
 		for y in range(size[1]):			# size[1] - height
 			for x in range(size[0]):		# size[0] - width
@@ -236,7 +236,7 @@ class Parser:
 
 		if (currentLevel == LevelEnum.Platformer.value):
 			self.__getTilesFromTileset(self.terrainLayer[0], path[2], (8, 16), 1)
-			self.__getTilesFromTileset(self.terrainLayer[1], path[2], (8, 16), 1)
+			self.__getTilesFromTileset(self.terrainLayer[1], path[3], (1, 1), 128)
 
 		# creating map from the file
 		self.terrainLayer[0].loadlayer()
@@ -373,7 +373,8 @@ class Level:
 
 				if (col in layer.tilesDict.keys()) and col == '128':
 					self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum.Coin.value, layer.tilesDict.get(col)))
-					# InfoLogger.info("Coin at the position: " + str(x) + ' ' + str(y))
+					InfoLogger.info("Coin at the position: " + str(x) + ' ' + str(y))
+				
 				if (col in layer.tilesDict.keys()) and col != '128':
 					self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum._None.value, layer.tilesDict.get(col)))
 

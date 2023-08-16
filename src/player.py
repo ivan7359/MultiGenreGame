@@ -49,25 +49,33 @@ class Player(pygame.sprite.Sprite):
 	def collision(self, axis):
 		for sprite in self.world.getArr():
 			if sprite.rect.colliderect(self.rect):
-				#Horizont
-				if axis == 'x':
-					if self.direction.x > 0: 
-						self.rect.right = sprite.rect.left
+				if(sprite.objType == TileEnum._None.value):
 
-					if self.direction.x < 0: 
-						self.rect.left = sprite.rect.right
+					#Horizont
+					if axis == 'x':
+						if self.direction.x > 0: 
+							self.rect.right = sprite.rect.left
 
-				#Vertical
-				if axis == 'y':
-					if self.dy > 0:
-						self.rect.bottom = sprite.rect.top
-						self.dy = 0
-						self.on_floor = True
-						self.jumpCounter = 1
+						if self.direction.x < 0: 
+							self.rect.left = sprite.rect.right
 
-					if self.dy < 0:
-						self.rect.top = sprite.rect.bottom
-						self.dy = 0
+					#Vertical
+					if axis == 'y':
+						if self.dy > 0:
+							self.rect.bottom = sprite.rect.top
+							self.dy = 0
+							self.on_floor = True
+							self.jumpCounter = 1
+
+						if self.dy < 0:
+							self.rect.top = sprite.rect.bottom
+							self.dy = 0
+				
+				if(sprite.objType == TileEnum.Coin.value):
+					self.world.getArr().remove(sprite)
+					tmp = int(savedValues["total_score"]) + 1
+					savedValues['total_score'] = str(tmp)
+					self.publisher.notify(EventsEnum.collectCoin.value)
 
 	def move(self, dt):
 		# horizontal movement
