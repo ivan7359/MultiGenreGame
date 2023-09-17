@@ -237,10 +237,11 @@ class Parser:
 		if (currentLevel == LevelEnum.Platformer.value):
 			self.__getTilesFromTileset(self.terrainLayer[0], path[2], (8, 16), 1)
 			self.__getTilesFromTileset(self.terrainLayer[1], path[3], (1, 1), 128)
-
+			self.__getTilesFromTileset(self.terrainLayer[2], path[5], (1, 1), 777777)
 		# creating map from the file
 		self.terrainLayer[0].loadlayer()
 		self.terrainLayer[1].loadlayer()
+		self.terrainLayer[2].loadlayer()
 		
 	def parceTMX(self, path):
 		# creating [id] = [image's path] dictionary
@@ -328,13 +329,14 @@ class Level:
 			self.shooterLoader(self.terrainLayer[0])
 
 		if (currentLevel == LevelEnum.Platformer.value):
-			self.terrainLayer = [Layer(path[0]), Layer(path[1])]
+			self.terrainLayer = [Layer(path[0]), Layer(path[1]), Layer(path[4])]
 			
 			self.parser = Parser(self.terrainLayer, self.assetMngr)
 			self.parser.mainParcer(path)
 
 			self.platformerLoader(self.terrainLayer[0])
 			self.platformerLoader(self.terrainLayer[1])
+			self.platformerLoader(self.terrainLayer[2])
 
 	def strategyLoader(self, layer, scale= 1):
 		for row_index, row in enumerate(layer.map):
