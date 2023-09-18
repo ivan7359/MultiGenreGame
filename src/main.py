@@ -89,7 +89,6 @@ class Game():
         for i in self.enemiesConfig:
             DebugLogger.debug(str(i) + ' ' + str(self.enemiesConfig[i]))
 
-
     def createUIWidgets(self):
         self.CurrPercent = 70
         self.img = pygame.image.load('media/pygame_logo_100x100.png')
@@ -373,19 +372,21 @@ class Game():
                     self.parseEnemiesJSON()
 
                     # Creating spawners of an enemies
-                    l_enemy_spawner = Spawner(LiteEnemy(self.level.tiles, self.publisher, self.enemiesConfig['LiteEnemy']), (300, 300))
-                    r_enemy_spawner = Spawner(RegularEnemy(self.level.tiles, self.publisher, self.enemiesConfig['RegularEnemy']), (400, 300))
-                    h_enemy_spawner = Spawner(HeavyEnemy(self.level.tiles, self.publisher, self.enemiesConfig['HeavyEnemy']), (500, 300))
+                    l_enemy_spawner = Spawner(LiteEnemy(self.level.tiles, self.publisher, self.enemiesConfig['LiteEnemy']), (300, 500))
+                    r_enemy_spawner = Spawner(RegularEnemy(self.level.tiles, self.publisher, self.enemiesConfig['RegularEnemy']), (400, 500))
+                    h_enemy_spawner = Spawner(HeavyEnemy(self.level.tiles, self.publisher, self.enemiesConfig['HeavyEnemy']), (650, 500))
 
                     # Adding enemies into the level
-                    # self.enemies.append(l_enemy_spawner.spawnAnEnemy())
-                    # self.enemies.append(r_enemy_spawner.spawnAnEnemy())
-                    # self.enemies.append(h_enemy_spawner.spawnAnEnemy())
+                    self.enemies.append(l_enemy_spawner.spawnAnEnemy())
+                    self.enemies.append(r_enemy_spawner.spawnAnEnemy())
+                    self.enemies.append(h_enemy_spawner.spawnAnEnemy())
 
                     self.isLevelInit = True
 
                 if (self.isLevelInit == True):
                     self.level.update(self.dt)
+                    self.player.update(self.dt, self.enemies)
+
 
         if (config.gameState == config.UIEnum.Pause.value):
             for widget in self.mainMenuWidgets:
@@ -441,7 +442,6 @@ class Game():
     def update(self):
         self.screen.fill("black")
         self.changeUIState()
-        print(config.gameState)
         self.manager.update(self.dt)
         # print(self.clock.get_fps())
         if(config.gameState == config.UIEnum.GameOver.value):
@@ -450,7 +450,9 @@ class Game():
     def render(self):
         self.manager.draw_ui(self.screen)
 
-        self.enemies.drawAllEnemies()
+        if (self.isLevelInit == True):
+            self.enemies.drawAllEnemies()
+            self.player.draw()
 
         pygame.display.update()
 

@@ -25,6 +25,7 @@ class TileEnum(enum.Enum):
     Chest = 2
     Coin = 3
     Portal = 4
+    Enemies = 5
 
 gameState = UIEnum.Game.value
 prev_gameState = gameState

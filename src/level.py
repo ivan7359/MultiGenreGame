@@ -391,10 +391,10 @@ class Level:
 		return self.collision_sprites
 
 	def update(self, dt):
-		self.player.update(dt)
+		# self.player.update(dt, enemies)
 		self.camera.followPlayer(dt, self.player, self.scale, self.isMiniMap)	# Draw the map
 		# self.camera.custom_draw(self.player)
-		self.player.draw()
+		# self.player.draw()
 		
 class Camera:
 	def __init__(self, tiles, publisher):

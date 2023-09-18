@@ -47,7 +47,7 @@ class Player(pygame.sprite.Sprite):
 		self.coord_offset.x = x
 		self.coord_offset.y = y
 
-	def collision(self, axis):
+	def collision(self, axis, enemies):
 		for sprite in self.world.getArr():
 			if sprite.rect.colliderect(self.rect):
 				if(sprite.objType == TileEnum._None.value):
@@ -81,7 +81,30 @@ class Player(pygame.sprite.Sprite):
 				if(sprite.objType == TileEnum.Portal.value):
 					print('touch portal')
 
-	def move(self, dt):
+		for enemy in enemies.getAllEnemies():
+			if enemy.rect.colliderect(self.rect):
+				if(enemy.objType == TileEnum.Enemies.value):
+					if axis == 'y':
+						if self.dy > 0:
+							self.rect.bottom = enemy.rect.top
+							self.dy = 0
+							enemies.getAllEnemies().remove(enemy)
+
+					if axis == 'x':
+						if self.direction.x > 0: 
+							self.rect.right = enemy.rect.left
+							self.health = self.health - 20
+							print("health", self.health)
+							print(self.rect)
+							self.rect.x = self.rect.x - 50
+
+						if self.direction.x < 0: 
+							self.rect.left = enemy.rect.right
+							self.health = self.health - 20
+							print("health", self.health)
+							self.rect.x = self.rect.x + 50
+
+	def move(self, dt, enemies):
 		# horizontal movement
 		if(self.isMoving[0] == True):
 			if self.movement_sound_timer > 0:
@@ -93,7 +116,7 @@ class Player(pygame.sprite.Sprite):
 	
 			self.dx = self.speed
 			self.rect.x += self.direction.x * self.dx * dt
-			self.collision('x')
+			self.collision('x', enemies)
 
 		# vertical movement
 		if(self.isMoving[1] == True):
@@ -102,24 +125,23 @@ class Player(pygame.sprite.Sprite):
 				if self.jumpCounter < self.baseJumpSpeed:
 					self.rect.y += self.dy * dt
 					self.jumpCounter += 1
-					self.collision('y')
+					self.collision('y', enemies)
 				else:
 					self.on_floor = False	
 				
 	def checkHorizont(self):
 		if(self.rect.y > 600):
 			config.gameState = UIEnum.GameOver.value
-
-
-	def update(self, dt):
+				
+	def update(self, dt, enemies):
 		if(currentLevel == LevelEnum.Platformer.value):
 			self.dy = self.gravity
 			self.rect.y += self.dy * dt
 
-			self.collision('y')
-			self.move(dt)
+			self.collision('y', enemies)
+			self.move(dt, enemies)
 			self.checkHorizont()
-
+					
 		if(currentLevel == LevelEnum.Strategy.value):
 			# if(self.isMoving[1] == True):
 			# 	self.rect.y += self.direction.y * self.speed * dt
