@@ -6,6 +6,7 @@ class UIEnum(enum.Enum):
     Settings = 2
     Pause = 3
     Game = 4
+    GameOver = 5
 
 class EventsEnum(enum.Enum):
     movement = 0
