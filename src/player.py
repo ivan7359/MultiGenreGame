@@ -1,4 +1,5 @@
 import pygame
+import config
 from config import *
 
 class Player(pygame.sprite.Sprite):
@@ -77,6 +78,9 @@ class Player(pygame.sprite.Sprite):
 					savedValues['total_score'] = str(tmp)
 					self.publisher.notify(EventsEnum.collectCoin.value)
 
+				if(sprite.objType == TileEnum.Portal.value):
+					print('touch portal')
+
 	def move(self, dt):
 		# horizontal movement
 		if(self.isMoving[0] == True):
@@ -102,7 +106,11 @@ class Player(pygame.sprite.Sprite):
 				else:
 					self.on_floor = False	
 				
-				
+	def checkHorizont(self):
+		if(self.rect.y > 600):
+			config.gameState = UIEnum.GameOver.value
+
+
 	def update(self, dt):
 		if(currentLevel == LevelEnum.Platformer.value):
 			self.dy = self.gravity
@@ -110,7 +118,8 @@ class Player(pygame.sprite.Sprite):
 
 			self.collision('y')
 			self.move(dt)
-					
+			self.checkHorizont()
+
 		if(currentLevel == LevelEnum.Strategy.value):
 			# if(self.isMoving[1] == True):
 			# 	self.rect.y += self.direction.y * self.speed * dt

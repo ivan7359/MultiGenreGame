@@ -360,7 +360,7 @@ class Game():
 
                 if (self.isLevelInit == True):
                     self.level.update(self.dt)
-
+                                    
             if (currentLevel == LevelEnum.Platformer.value):
                 if(self.isLevelInit == False):
                     self.level = Level(self.assetMngr, self.publisher)
@@ -441,8 +441,11 @@ class Game():
     def update(self):
         self.screen.fill("black")
         self.changeUIState()
+        print(config.gameState)
         self.manager.update(self.dt)
         # print(self.clock.get_fps())
+        if(config.gameState == config.UIEnum.GameOver.value):
+            self.isLevelInit = False
 
     def render(self):
         self.manager.draw_ui(self.screen)

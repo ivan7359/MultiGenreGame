@@ -373,12 +373,16 @@ class Level:
 				x = col_index * TILE_SIZE
 				y = row_index * TILE_SIZE
 
+				if (col in layer.tilesDict.keys()) and col == '777777':
+					self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum.Portal.value, layer.tilesDict.get(col)))
+
 				if (col in layer.tilesDict.keys()) and col == '128':
 					self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum.Coin.value, layer.tilesDict.get(col)))
 					InfoLogger.info("Coin at the position: " + str(x) + ' ' + str(y))
 				
-				if (col in layer.tilesDict.keys()) and col != '128':
+				if (col in layer.tilesDict.keys()) and col != '128' and col != '777777':
 					self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum._None.value, layer.tilesDict.get(col)))
+									
 
 	def getGroups(self):
 		return [self.visible_sprites, self.active_sprites]
