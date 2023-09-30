@@ -177,6 +177,12 @@ class Game():
         self.pauseWidgets['settings_pause_button'] = pygame_gui.elements.UIButton(relative_rect=pygame.Rect(((WIDTH / 2) - (button_width / 2), (HEIGHT / 3) + (OFFSET * 8.5) + button_height), (button_width, button_height)), text='Settings', manager=self.manager)
         self.pauseWidgets['exit_pause_button'] = pygame_gui.elements.UIButton(relative_rect=pygame.Rect(((WIDTH / 2) - (button_width / 2), (HEIGHT / 3) + (OFFSET * 12) + (button_height * 2)), (button_width, button_height)), text='Exit', manager=self.manager)
 
+# Game over menu
+        self.GameOverWidgets = {}
+        self.GameOverWidgets['GameOver_label'] = pygame_gui.elements.UILabel(relative_rect=pygame.Rect(((WIDTH / 2) - (label_sp_width / 2), (HEIGHT / 3) - (label_sp_height / 2)), (label_sp_width, label_sp_height)), text="Game over", manager=self.manager)
+        self.GameOverWidgets['New_game_button'] = pygame_gui.elements.UIButton(relative_rect=pygame.Rect(((WIDTH / 2) - (button_width / 2), (HEIGHT / 3) + (OFFSET * 5)), (button_width, button_height)), text='New game', manager=self.manager)
+        self.GameOverWidgets['Exit_gameover_button'] = pygame_gui.elements.UIButton(relative_rect=pygame.Rect(((WIDTH / 2) - (button_width / 2), (HEIGHT / 3) + (OFFSET * 12) + (button_height * 2)), (button_width, button_height)), text='Exit', manager=self.manager)
+    
     # Singleton pattern
     def __new__(cls):
         if not hasattr(cls, 'instance'):
@@ -240,6 +246,13 @@ class Game():
             if event.ui_element == self.pauseWidgets['exit_pause_button']:
                 config.gameState = config.UIEnum.Main_menu.value
 
+            # Game over menu
+            if event.ui_element == self.GameOverWidgets['New_game_button']:
+                config.gameState = config.UIEnum.Game.value
+
+            if event.ui_element == self.GameOverWidgets['Exit_gameover_button']:
+                config.gameState = config.UIEnum.Main_menu.value
+
         if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
             if event.ui_element == self.settingsWidgets['Sound_slider']:
                 bgMusicValue = self.backgroundMusic.get_volume()
@@ -298,6 +311,9 @@ class Game():
             for widget in self.pauseWidgets:
                 self.pauseWidgets[widget].hide()
 
+            for widget in self.GameOverWidgets:
+                self.GameOverWidgets[widget].hide()
+
         if (config.gameState == config.UIEnum.Game.value):
             for widget in self.mainMenuWidgets:
                 self.mainMenuWidgets[widget].hide()
@@ -310,6 +326,9 @@ class Game():
 
             for widget in self.pauseWidgets:
                 self.pauseWidgets[widget].hide()
+
+            for widget in self.GameOverWidgets:
+                self.GameOverWidgets[widget].hide()
 
             if (currentLevel == LevelEnum.Strategy.value):
                 if(self.isLevelInit == False):
@@ -381,6 +400,9 @@ class Game():
             for widget in self.pauseWidgets:
                 self.pauseWidgets[widget].show()
 
+            for widget in self.GameOverWidgets:
+                self.GameOverWidgets[widget].hide()
+
         if (config.gameState == config.UIEnum.Settings.value):
             self.screen.fill("black")
 
@@ -395,6 +417,26 @@ class Game():
 
             for widget in self.pauseWidgets:
                 self.pauseWidgets[widget].hide()
+
+            for widget in self.GameOverWidgets:
+                self.GameOverWidgets[widget].hide()
+
+        if (config.gameState == config.UIEnum.GameOver.value):
+
+            for widget in self.mainMenuWidgets:
+                self.mainMenuWidgets[widget].hide()
+
+            for widget in self.settingsWidgets:
+                self.settingsWidgets[widget].hide()
+
+            for widget in self.settingsControls:
+                self.settingsControls[widget].hide()
+
+            for widget in self.pauseWidgets:
+                self.pauseWidgets[widget].hide()
+            
+            for widget in self.GameOverWidgets:
+                self.GameOverWidgets[widget].show() 
 
     def update(self):
         self.screen.fill("black")
