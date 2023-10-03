@@ -1,4 +1,5 @@
 import pygame
+import config
 from config import *
 from player import *
 
@@ -305,7 +306,7 @@ class Level:
 	def setup_level(self, player, path):
 		self.player = player
 
-		if (currentLevel == LevelEnum.Strategy.value):
+		if (config.currentLevel == LevelEnum.Strategy.value):
 			self.terrainLayer = [Layer(path[0]), Layer(path[0]), Layer(path[0])]
 
 			self.parser = Parser(self.terrainLayer, self.assetMngr)
@@ -320,7 +321,7 @@ class Level:
 				self.strategyLoader(self.terrainLayer[1])
 				self.strategyLoader(self.terrainLayer[2])
 
-		if (currentLevel == LevelEnum.Shooter.value):
+		if (config.currentLevel == LevelEnum.Shooter.value):
 			self.terrainLayer = [Layer(path[0])]
 			
 			self.parser = Parser(self.terrainLayer, self.assetMngr)
@@ -328,7 +329,7 @@ class Level:
 
 			self.shooterLoader(self.terrainLayer[0])
 
-		if (currentLevel == LevelEnum.Platformer.value):
+		if (config.currentLevel == LevelEnum.Platformer.value):
 			self.terrainLayer = [Layer(path[0]), Layer(path[1]), Layer(path[4])]
 			
 			self.parser = Parser(self.terrainLayer, self.assetMngr)

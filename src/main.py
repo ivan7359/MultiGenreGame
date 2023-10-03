@@ -1,5 +1,5 @@
 import pygame, pygame_gui, json, threading
-import config 
+import config
 
 from observer import *
 from command import *
@@ -180,7 +180,7 @@ class Game():
         self.GameOverWidgets = {}
         self.GameOverWidgets['GameOver_label'] = pygame_gui.elements.UILabel(relative_rect=pygame.Rect(((WIDTH / 2) - (label_sp_width / 2), (HEIGHT / 3) - (label_sp_height / 2)), (label_sp_width, label_sp_height)), text="Game over", manager=self.manager)
         self.GameOverWidgets['New_game_button'] = pygame_gui.elements.UIButton(relative_rect=pygame.Rect(((WIDTH / 2) - (button_width / 2), (HEIGHT / 3) + (OFFSET * 5)), (button_width, button_height)), text='New game', manager=self.manager)
-        self.GameOverWidgets['Exit_gameover_button'] = pygame_gui.elements.UIButton(relative_rect=pygame.Rect(((WIDTH / 2) - (button_width / 2), (HEIGHT / 3) + (OFFSET * 12) + (button_height * 2)), (button_width, button_height)), text='Exit', manager=self.manager)
+        self.GameOverWidgets['Exit_gameover_button'] = pygame_gui.elements.UIButton(relative_rect=pygame.Rect(((WIDTH / 2) - (button_width / 2), (HEIGHT / 3) + (OFFSET * 4) + (button_height * 2)), (button_width, button_height)), text='Exit', manager=self.manager)
     
     # Singleton pattern
     def __new__(cls):
@@ -205,16 +205,16 @@ class Game():
                 self.running = False
 
             if event.ui_element == self.mainMenuWidgets['left_arrow_button']:
-                if (currentLevel == 0):
-                    currentLevel = 2
+                if (config.currentLevel == 0):
+                    config.currentLevel = 2
                 else:
-                    currentLevel -= 1
-
+                    config.currentLevel -= 1   
+                
             if event.ui_element == self.mainMenuWidgets['right_arrow_button']:
-                if (currentLevel == 2):
-                    currentLevel = 0
+                if (config.currentLevel == 2):
+                    config.currentLevel = 0
                 else:
-                    currentLevel += 1
+                    config.currentLevel += 1    
 
             # Settings
             if event.ui_element == self.settingsWidgets['info_settings_button']:
@@ -297,6 +297,8 @@ class Game():
 
     def changeUIState(self):
         if (config.gameState == config.UIEnum.Main_menu.value):
+            
+            self.isLevelInit = False
 
             for widget in self.mainMenuWidgets:
                 self.mainMenuWidgets[widget].show()
@@ -329,10 +331,10 @@ class Game():
             for widget in self.GameOverWidgets:
                 self.GameOverWidgets[widget].hide()
 
-            if (currentLevel == LevelEnum.Strategy.value):
+            if (config.currentLevel == LevelEnum.Strategy.value):
                 if(self.isLevelInit == False):
                     
-                    self.level = Level(self.assetMngr)
+                    self.level = Level(self.assetMngr, self.publisher)
                     self.miniMap = Level(self.assetMngr, True)
 
                     self.player = Player(self.level.tiles, self.publisher)
@@ -347,7 +349,7 @@ class Game():
                     self.level.update(self.dt)
                     self.miniMap.update(self.dt)
 
-            if (currentLevel == LevelEnum.Shooter.value):
+            if (config.currentLevel == LevelEnum.Shooter.value):
                 if(self.isLevelInit == False):
                     self.level = Level(self.assetMngr)
                     self.player = Player(self.level.tiles, self.publisher)
@@ -360,7 +362,7 @@ class Game():
                 if (self.isLevelInit == True):
                     self.level.update(self.dt)
                                     
-            if (currentLevel == LevelEnum.Platformer.value):
+            if (config.currentLevel == LevelEnum.Platformer.value):
                 if(self.isLevelInit == False):
                     self.level = Level(self.assetMngr, self.publisher)
                     self.player = Player(self.level.tiles, self.publisher)
@@ -386,7 +388,6 @@ class Game():
                 if (self.isLevelInit == True):
                     self.level.update(self.dt)
                     self.player.update(self.dt, self.enemies)
-
 
         if (config.gameState == config.UIEnum.Pause.value):
             for widget in self.mainMenuWidgets:

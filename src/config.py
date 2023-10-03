@@ -27,7 +27,7 @@ class TileEnum(enum.Enum):
     Portal = 4
     Enemies = 5
 
-gameState = UIEnum.Game.value
+gameState = UIEnum.Main_menu.value
 prev_gameState = gameState
 currentLevel = LevelEnum.Platformer.value
 

@@ -78,8 +78,8 @@ class Player(pygame.sprite.Sprite):
 					savedValues['total_score'] = str(tmp)
 					self.publisher.notify(EventsEnum.collectCoin.value)
 
-				if(sprite.objType == TileEnum.Portal.value):
-					print('touch portal')
+				if(sprite.objType == TileEnum.Portal.value and (len(enemies.getAllEnemies()) < 1)):
+					config.gameState = config.UIEnum.Main_menu.value
 
 		for enemy in enemies.getAllEnemies():
 			if enemy.rect.colliderect(self.rect):
@@ -94,14 +94,11 @@ class Player(pygame.sprite.Sprite):
 						if self.direction.x > 0: 
 							self.rect.right = enemy.rect.left
 							self.health = self.health - 20
-							print("health", self.health)
-							print(self.rect)
 							self.rect.x = self.rect.x - 50
 
 						if self.direction.x < 0: 
 							self.rect.left = enemy.rect.right
 							self.health = self.health - 20
-							print("health", self.health)
 							self.rect.x = self.rect.x + 50
 
 	def move(self, dt, enemies):
@@ -130,9 +127,13 @@ class Player(pygame.sprite.Sprite):
 					self.on_floor = False	
 				
 	def checkHorizont(self):
-		if(self.rect.y > 600):
+		if(self.rect.y > HEIGHT * 1.25):
 			config.gameState = UIEnum.GameOver.value
-				
+
+	def rulesOfTheGame(self):
+		if(self.health < 1):
+			config.gameState = UIEnum.GameOver.value
+							
 	def update(self, dt, enemies):
 		if(currentLevel == LevelEnum.Platformer.value):
 			self.dy = self.gravity
@@ -141,6 +142,7 @@ class Player(pygame.sprite.Sprite):
 			self.collision('y', enemies)
 			self.move(dt, enemies)
 			self.checkHorizont()
+			self.rulesOfTheGame()
 					
 		if(currentLevel == LevelEnum.Strategy.value):
 			# if(self.isMoving[1] == True):
