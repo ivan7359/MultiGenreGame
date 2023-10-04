@@ -13,6 +13,10 @@ class Player(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect(center = (WIDTH / 2, 0))
 		self.coord_offset = pygame.math.Vector2()
 
+		self.offset = pygame.math.Vector2()
+		self.half_w = self.display_surface.get_size()[0] // 2
+		self.half_h = self.display_surface.get_size()[1] // 2
+
 		self.health = 100
 		self.damage = 34
 
@@ -126,7 +130,7 @@ class Player(pygame.sprite.Sprite):
 				else:
 					self.on_floor = False	
 				
-	def checkHorizont(self):
+	def checkHeroFalling(self):
 		if(self.rect.y > HEIGHT * 1.25):
 			config.gameState = UIEnum.GameOver.value
 
@@ -141,7 +145,7 @@ class Player(pygame.sprite.Sprite):
 
 			self.collision('y', enemies)
 			self.move(dt, enemies)
-			self.checkHorizont()
+			self.checkHeroFalling()
 			self.rulesOfTheGame()
 					
 		if(currentLevel == LevelEnum.Strategy.value):
@@ -149,5 +153,13 @@ class Player(pygame.sprite.Sprite):
 			# 	self.rect.y += self.direction.y * self.speed * dt
 			pass
 
-	def draw(self):
-		self.display_surface.blit(self.image, self.rect.topleft)
+	def draw(self, offset):
+		# self.display_surface.blit(self.image, self.rect.topleft)
+		# self.center_target_camera()
+		# offset_pos = self.rect.topleft - self.offset
+		# self.display_surface.blit(self.image, offset_pos)
+
+		offset_posZ = self.rect.topleft - offset
+		self.display_surface.blit(self.image, offset_posZ)
+
+		# pass

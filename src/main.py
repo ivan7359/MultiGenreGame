@@ -8,6 +8,7 @@ from assetManager import *
 from player import *
 from level import *
 from Enemy import *
+from camera import *
 
 class Game():
     def __init__(self):
@@ -368,6 +369,7 @@ class Game():
                     self.player = Player(self.level.tiles, self.publisher)
                     arrPath = ["maps/platformer/Platformer.txt", "maps/platformer/LayerCoins.txt", "media/Platformer/img/Environment/Tileset2.png", "media/Platformer/img/coin_1.png", "maps/platformer/LayerPortal.txt", "media/Platformer/img/Objects/portal.png"]
                     self.level.setup_level(self.player, arrPath)
+                    self.camera = CameraGroup(self.level, self.player)
                     self.loadProgress()
                     # InfoLogger.info(str(savedValues))
 
@@ -386,8 +388,8 @@ class Game():
                     self.isLevelInit = True
 
                 if (self.isLevelInit == True):
-                    self.level.update(self.dt)
                     self.player.update(self.dt, self.enemies)
+                    
 
         if (config.gameState == config.UIEnum.Pause.value):
             for widget in self.mainMenuWidgets:
@@ -444,7 +446,7 @@ class Game():
         self.screen.fill("black")
         self.changeUIState()
         self.manager.update(self.dt)
-        # print(self.clock.get_fps())
+        print(self.clock.get_fps())
         if(config.gameState == config.UIEnum.GameOver.value):
             self.isLevelInit = False
 
@@ -452,8 +454,8 @@ class Game():
         self.manager.draw_ui(self.screen)
 
         if (self.isLevelInit == True):
+            self.camera.custom_draw()
             self.enemies.drawAllEnemies()
-            self.player.draw()
 
         pygame.display.update()
 

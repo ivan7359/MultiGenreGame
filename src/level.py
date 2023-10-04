@@ -300,7 +300,7 @@ class Level:
 
 		self.scale = 16
 		self.tiles = TilesObjectPool()
-		self.camera = Camera(self.tiles, publisher)
+		# self.camera = Camera(self.tiles, publisher)
 		# self.camera = CameraGroup(self.tiles, publisher)
 
 	def setup_level(self, player, path):
@@ -391,113 +391,13 @@ class Level:
 	def getCollSprites(self):
 		return self.collision_sprites
 
-	def update(self, dt):
-		# self.player.update(dt, enemies)
-		self.camera.followPlayer(dt, self.player, self.scale, self.isMiniMap)	# Draw the map
+	def draw(self, offset):
+		# self.camera.followPlayer(dt, self.player, self.scale, self.isMiniMap)	# Draw the map
 		# self.camera.custom_draw(self.player)
 		# self.player.draw()
-		
-class Camera:
-	def __init__(self, tiles, publisher):
-		self.display_surface = pygame.display.get_surface()
-		self.offset = pygame.math.Vector2(100, 300)
-		self.tiles = tiles
-		self.offset_pos = pygame.math.Vector2()
-		self.publisher = publisher
-
-		# center camera setup 
-		# self.half_w = self.display_surface.get_size()[0] // 2
-		# self.half_h = self.display_surface.get_size()[1] // 2
-
-		# camera
-		cam_left = CAMERA_BORDERS['left']
-		cam_top = CAMERA_BORDERS['top']
-		cam_width = self.display_surface.get_size()[0] - (cam_left + CAMERA_BORDERS['right'])
-		cam_height = self.display_surface.get_size()[1] - (cam_top + CAMERA_BORDERS['bottom'])
-
-		self.camera_rect = pygame.Rect(cam_left, cam_top, cam_width, cam_height)
-		self.prev_camera_rect = pygame.Rect(cam_left, cam_top, cam_width, cam_height)
-
-	def horizontal_collisions(self, player, sprite):
-		if player.rect.colliderect(sprite.rect):
-
-			# Horizontal collisions
-			if(sprite.objType == TileEnum._None.value):
-				if player.direction.x < 0: 
-					player.rect.left = sprite.rect.right
-				if player.direction.x > 0: 
-					player.rect.right = sprite.rect.left
-			
-			# Vertical collisions
-				if player.direction.y > 0:
-					player.rect.bottom = sprite.rect.top
-					player.direction.y = 0
-					print("verx")
-					player.on_floor = True
-					# self.countJump = 2
-				if player.direction.y < 0:
-					print("niz")
-					player.rect.top = sprite.rect.bottom
-					player.direction.y = 0
-
-			if(sprite.objType == TileEnum.Coin.value):
-				print(sprite.pos)
-				self.tiles.getArr().remove(sprite)
-				tmp = int(savedValues["total_score"]) + 1
-				savedValues['total_score'] = str(tmp)
-				self.publisher.notify(EventsEnum.collectCoin.value)
-				print(savedValues["total_score"])
-
-	def followPlayer(self, dt, player, scale, isMiniMap= False):
-		# get the player offset 
-		# self.offset.x = player.rect.centerx - self.half_w
-		# self.offset.y = player.rect.centery - self.half_h
-
-		# getting the camera position
-		# if player.rect.left < self.camera_rect.left:
-		# 	self.camera_rect.left = player.rect.left
-
-		# if player.rect.right > self.camera_rect.right:
-		# 	self.camera_rect.right = player.rect.right
-
-		# if player.rect.top < self.camera_rect.top:
-		# 	self.camera_rect.top = player.rect.top
-
-		# if player.rect.bottom > self.camera_rect.bottom:
-		# 	self.camera_rect.bottom = player.rect.bottom
-
-		# self.offset = pygame.math.Vector2(
-		# 	self.camera_rect.left - CAMERA_BORDERS['left'],
-		# 	self.camera_rect.top - CAMERA_BORDERS['top'])
-		
 
 		for sprite in self.tiles.getArr():
-			# if (isMiniMap == False):
-			# if(player.isMoving[0] == True):
-				# sprite.rect.left -= player.direction.x * player.speed * dt
-				# self.horizontal_collisions(player, sprite)
-			
-			# if(player.isMoving[1] == True):
-			# sprite.rect.top -= player.direction.y * player.jump_speed * dt
-			# sprite.rect.y += self.direction.y * dt
+			offset_pos = round(sprite.rect.topleft - offset)
+			self.display_surface.blit(sprite.image, offset_pos)
 
-		# self.offset_pos = sprite.rect.topleft - self.offset
-			self.display_surface.blit(sprite.image, sprite.rect)
-
-		# Camera rectangle for debug 
-		# pygame.draw.rect(self.display_surface, (255, 0, 0), self.camera_rect, 8)
-
-class CameraGroup():
-	def __init__(self, tiles, publisher):
-		self.display_surface = pygame.display.get_surface()
-		self.offset = pygame.math.Vector2()
-		self.tiles = tiles
-
-	def custom_draw(self, player):
-		self.offset.x = player.rect.centerx - WIDTH / 2
-		self.offset.y = player.rect.centery - HEIGHT / 2
-
-		for sprite in self.tiles.getArr():
-			offset_rect = sprite.rect.copy()
-			offset_rect.center -= self.offset
-			self.display_surface.blit(sprite.image, offset_rect)
+		# pass
