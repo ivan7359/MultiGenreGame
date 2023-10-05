@@ -446,7 +446,7 @@ class Game():
         self.screen.fill("black")
         self.changeUIState()
         self.manager.update(self.dt)
-        print(self.clock.get_fps())
+        # print(self.clock.get_fps())
         if(config.gameState == config.UIEnum.GameOver.value):
             self.isLevelInit = False
 

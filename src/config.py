@@ -61,8 +61,8 @@ OFFSET = 10
 SOUND_PLAYING_DELAY = 30 
 
 CAMERA_BORDERS = {
-	'left': 100,
-	'right': 200,
+	'left': 200,
+	'right': 400,
 	'top':100,
 	'bottom': 150
 }

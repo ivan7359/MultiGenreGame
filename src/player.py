@@ -154,12 +154,5 @@ class Player(pygame.sprite.Sprite):
 			pass
 
 	def draw(self, offset):
-		# self.display_surface.blit(self.image, self.rect.topleft)
-		# self.center_target_camera()
-		# offset_pos = self.rect.topleft - self.offset
-		# self.display_surface.blit(self.image, offset_pos)
-
-		offset_posZ = self.rect.topleft - offset
-		self.display_surface.blit(self.image, offset_posZ)
-
-		# pass
+		offset_posP = self.rect.topleft - offset
+		self.display_surface.blit(self.image, offset_posP)
