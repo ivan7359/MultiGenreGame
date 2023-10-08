@@ -379,12 +379,15 @@ class Level:
 
 				if (col in layer.tilesDict.keys()) and col == '777777':
 					self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum.Portal.value, layer.tilesDict.get(col)))
+				
+				if (col in layer.tilesDict.keys()) and col == '888888':
+					self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum.Buff.value, layer.tilesDict.get(col)))
 
 				if (col in layer.tilesDict.keys()) and col == '128':
 					self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum.Coin.value, layer.tilesDict.get(col)))
 					InfoLogger.info("Coin at the position: " + str(x) + ' ' + str(y))
 				
-				if (col in layer.tilesDict.keys()) and col != '128' and col != '777777':
+				if (col in layer.tilesDict.keys()) and col != '128' and col != '777777' and col != '888888':
 					self.tiles.append(Tile(self.assetMngr, (x,y), TileEnum._None.value, layer.tilesDict.get(col)))
 									
 
